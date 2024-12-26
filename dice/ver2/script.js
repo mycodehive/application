@@ -2,16 +2,11 @@ document.addEventListener("DOMContentLoaded", () => {
   let diceCount = 1;
 
   const diceContainer = document.getElementById("dice-container");
+  const diceSumDisplay = document.getElementById("dice-sum"); // 헤더에 합계를 표시
   const diceCountDisplay = document.getElementById("dice-count");
   const increaseDiceButton = document.getElementById("increase-dice");
   const decreaseDiceButton = document.getElementById("decrease-dice");
   const diceArea = document.getElementById("dice-area");
-
-  // 주사위 합계를 표시할 엘리먼트 추가
-  const diceSumDisplay = document.createElement("div");
-  diceSumDisplay.id = "dice-sum";
-  diceSumDisplay.textContent = "0";
-  diceContainer.parentNode.appendChild(diceSumDisplay);
 
   // 주사위 UI 업데이트
   function updateDiceUI() {
@@ -55,7 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 합계 업데이트 함수
   function updateDiceSum(sum) {
-    diceSumDisplay.textContent = sum > 0 ? `${sum}` : "";
+    diceSumDisplay.textContent = sum > 0 ? `${sum}` : "굴려라 주사위!";
   }
 
   // 주사위 개수 증가

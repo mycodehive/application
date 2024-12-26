@@ -9,16 +9,14 @@ body {
   background-color: #f0f0f0;
 }
 
-.header, .footer {
+.header {
   text-align: center;
-  padding: 10px;
+  padding: 20px;
   background-color: #4caf50;
   color: white;
-}
-
-.header {
-  font-size: 24px;
+  font-size: 36px;
   font-weight: bold;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .footer {
@@ -26,25 +24,23 @@ body {
   justify-content: center;
   align-items: center;
   gap: 10px;
-  padding: 10px;
+  padding: 15px;
+  background-color: #fff;
+  border-top: 1px solid #ccc;
 }
 
 .footer button {
   font-size: 20px;
-  padding: 5px 15px;
-  background-color: #fff;
-  border: 1px solid #ccc;
+  padding: 10px 20px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
   border-radius: 5px;
   cursor: pointer;
 }
 
 .footer button:hover {
-  background-color: #eee;
-}
-
-#dice-count {
-  font-size: 20px;
-  font-weight: bold;
+  background-color: #45a049;
 }
 
 .content {
@@ -52,34 +48,20 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 20px;
   background-color: #ffffff;
-  cursor: pointer;
-  position: relative;
 }
 
 #dice-container {
   display: flex;
-  gap: 10px;
+  gap: 15px;
   flex-wrap: wrap;
   justify-content: center;
-  position: relative;
-}
-
-#dice-sum {
-  position: absolute;
-  top: 20%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 50px;
-  font-weight: bold;
-  color: #4caf50;
-  z-index: 10;
-  pointer-events: none; /* 클릭 방지 */
 }
 
 .dice {
-  width: 250px;
-  height: 250px;
+  width: 200px;
+  height: 200px;
 }
 
 .dice img {

@@ -1,0 +1,10 @@
+||losespiritsdiscord.com^
+||reducediscord.com^
+||surrounddiscord.com^
+||owl.sentrydiscord.dev^
+||discord.com^
+||discordapp.com^
+||cdn.discordapp.com^
+||media.discordapp.net^
+||gateway.discord.gg^
+||discord.gg^

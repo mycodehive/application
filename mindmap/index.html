@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>정적 마인드맵</title>
+  <!-- jsMind CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/jsmind@0.4.8/style/jsmind.css" />
+  <link rel="stylesheet" href="mindmap.css" />
+</head>
+<body>
+  <div id="toolbar">
+    <button id="btn_add_child">자식 노드 추가</button>
+    <button id="btn_add_sibling">형제 노드 추가</button>
+    <button id="btn_del_node">노드 삭제</button>
+    <button id="btn_save">저장</button>
+    <button id="btn_load">불러오기</button>
+    <button id="btn_export">내보내기</button>
+    <button id="btn_import">가져오기</button>
+    <input type="file" id="file_input" style="display:none" />
+  </div>
+  <div id="jsmind_container"></div>
+  <script src="https://unpkg.com/jsmind@0.4.8/js/jsmind.js"></script>
+  <script src="mindmap.js"></script>
+</body>
+</html>

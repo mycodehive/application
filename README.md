@@ -8,3 +8,6 @@
 
 ### img2img
  - https://mycodehive.github.io/application/convert/img2img.html
+
+### mindmap
+ - https://mycodehive.github.io/application/mindmap/

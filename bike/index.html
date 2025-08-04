@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bike Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h1>🚴 자전거 트래커</h1>
+  <div id="info">
+    <p>⏱ 러닝타임: <span id="time">00:00</span></p>
+    <p>📍 현재 속도: <span id="speed">0</span> km/h</p>
+    <p>🏁 최고 속도: <span id="max-speed">0</span> km/h</p>
+    <p>🗻 고도: <span id="altitude">--</span> m</p>
+  </div>
+  <button onclick="startTracking()">시작</button>
+  <button onclick="stopTracking()">정지</button>
+  <script src="app.js"></script>
+</body>
+</html>

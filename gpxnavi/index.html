@@ -42,26 +42,31 @@
       <section class="map-status-overlay" aria-live="polite">
         <div class="section-title-row">
           <h2>주행 상태</h2>
-          <span id="nav-state-badge" class="state-badge idle">대기</span>
+          <div class="status-header-actions">
+            <span id="nav-state-badge" class="state-badge idle">대기</span>
+            <button id="status-toggle-btn" class="status-toggle-btn" type="button" aria-expanded="true">접기</button>
+          </div>
         </div>
-        <p id="status-message" class="status-message">GPX 파일을 먼저 불러오세요.</p>
-        <div class="metrics-grid compact">
-          <article class="metric">
-            <span class="metric-label">경로 길이</span>
-            <strong id="route-distance">-</strong>
-          </article>
-          <article class="metric">
-            <span class="metric-label">남은 거리</span>
-            <strong id="remaining-distance">-</strong>
-          </article>
-          <article class="metric">
-            <span class="metric-label">경로 이탈</span>
-            <strong id="off-route-distance">-</strong>
-          </article>
-          <article class="metric">
-            <span class="metric-label">현재 속도</span>
-            <strong id="current-speed">-</strong>
-          </article>
+        <div id="status-detail" class="status-detail">
+          <p id="status-message" class="status-message">GPX 파일을 먼저 불러오세요.</p>
+          <div class="metrics-grid compact">
+            <article class="metric">
+              <span class="metric-label">경로 길이</span>
+              <strong id="route-distance">-</strong>
+            </article>
+            <article class="metric">
+              <span class="metric-label">남은 거리</span>
+              <strong id="remaining-distance">-</strong>
+            </article>
+            <article class="metric">
+              <span class="metric-label">경로 이탈</span>
+              <strong id="off-route-distance">-</strong>
+            </article>
+            <article class="metric">
+              <span class="metric-label">현재 속도</span>
+              <strong id="current-speed">-</strong>
+            </article>
+          </div>
         </div>
       </section>
     </main>

@@ -201,6 +201,22 @@ button:disabled {
   font-size: 1.12rem;
 }
 
+.status-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-toggle-btn {
+  display: none;
+  border: 1px solid rgba(143, 185, 255, 0.26);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+}
+
 .status-message {
   margin: 14px 0 16px;
   color: #dfeaff;
@@ -385,6 +401,14 @@ button:disabled {
   backdrop-filter: blur(16px);
 }
 
+.status-detail {
+  display: block;
+}
+
+.map-status-overlay.collapsed .status-detail {
+  display: none;
+}
+
 .metrics-grid.compact {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
@@ -449,6 +473,13 @@ button:disabled {
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
+}
+
+#route-name {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .leaflet-container {
@@ -528,6 +559,7 @@ button:disabled {
   .map-overlay {
     top: 16px;
     right: 16px;
+    gap: 8px;
   }
 
   .map-status-overlay {
@@ -543,16 +575,89 @@ button:disabled {
 }
 
 @media (max-width: 720px) {
-  .map-overlay {
-    top: 70px;
+  .menu-toggle-btn {
+    top: 14px;
     left: 14px;
+    padding: 9px 12px;
+  }
+
+  .leaflet-top.leaflet-left {
+    top: 66px;
+  }
+
+  .map-overlay {
+    top: 14px;
+    left: 94px;
     right: 14px;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 8px;
   }
 
   .overlay-chip {
     min-width: 0;
     max-width: none;
+    padding: 10px 12px;
+    border-radius: 14px;
+  }
+
+  .overlay-label {
+    margin-bottom: 2px;
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+  }
+
+  .overlay-chip strong {
+    font-size: 1.05rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .overlay-action {
+    flex: 0 0 130px;
+  }
+
+  .overlay-chip.accent {
+    flex: 1;
+  }
+
+  .map-status-overlay {
+    left: 12px;
+    right: 12px;
+    bottom: calc(8px + env(safe-area-inset-bottom));
+    border-radius: 14px;
+    padding: 10px 12px;
+  }
+
+  .map-status-overlay .section-title-row h2 {
+    font-size: 1rem;
+  }
+
+  .map-status-overlay.collapsed {
+    padding: 10px 12px;
+  }
+
+  .status-toggle-btn {
+    display: inline-flex;
+  }
+
+  .status-message {
+    margin: 10px 0 12px;
+    font-size: 0.94rem;
+  }
+
+  .metrics-grid.compact .metric {
+    padding: 8px 10px;
+  }
+
+  .metrics-grid.compact .metric-label {
+    font-size: 0.78rem;
+  }
+
+  .metrics-grid.compact .metric strong {
+    font-size: 0.95rem;
+    margin-top: 4px;
   }
 
   .panel-header h1 {
@@ -578,6 +683,10 @@ button:disabled {
 
   .map-status-overlay {
     padding: 12px;
+  }
+
+  .map-status-overlay.collapsed {
+    padding: 9px 10px;
   }
 
   .detail-list div {

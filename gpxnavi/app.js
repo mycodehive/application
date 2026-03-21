@@ -11,6 +11,8 @@ const elements = {
   menuToggleBtn: document.getElementById("menu-toggle-btn"),
   menuCloseBtn: document.getElementById("menu-close-btn"),
   menuBackdrop: document.getElementById("menu-backdrop"),
+  statusOverlay: document.querySelector(".map-status-overlay"),
+  statusToggleBtn: document.getElementById("status-toggle-btn"),
   fileInput: document.getElementById("gpx-file"),
   fitRouteBtn: document.getElementById("fit-route-btn"),
   centerLocationBtn: document.getElementById("center-location-btn"),
@@ -57,6 +59,7 @@ const state = {
 };
 
 const mobileMenuQuery = window.matchMedia("(max-width: 1100px)");
+const compactStatusQuery = window.matchMedia("(max-width: 720px)");
 
 function setMenuOpen(open) {
   const shouldOpen = mobileMenuQuery.matches ? open : false;
@@ -67,6 +70,13 @@ function setMenuOpen(open) {
   requestAnimationFrame(() => {
     map.invalidateSize();
   });
+}
+
+function setStatusPanelCollapsed(collapsed) {
+  const shouldCollapse = compactStatusQuery.matches ? collapsed : false;
+  elements.statusOverlay.classList.toggle("collapsed", shouldCollapse);
+  elements.statusToggleBtn.textContent = shouldCollapse ? "펼치기" : "접기";
+  elements.statusToggleBtn.setAttribute("aria-expanded", String(!shouldCollapse));
 }
 
 function updateQuickActionButton() {
@@ -698,6 +708,11 @@ elements.menuBackdrop.addEventListener("click", () => {
   setMenuOpen(false);
 });
 
+elements.statusToggleBtn.addEventListener("click", () => {
+  const isCollapsed = elements.statusOverlay.classList.contains("collapsed");
+  setStatusPanelCollapsed(!isCollapsed);
+});
+
 elements.quickActionBtn.addEventListener("click", () => {
   if (state.watchId !== null) {
     stopNavigation(true);
@@ -714,6 +729,10 @@ mobileMenuQuery.addEventListener("change", () => {
   }
 
   map.invalidateSize();
+});
+
+compactStatusQuery.addEventListener("change", () => {
+  setStatusPanelCollapsed(compactStatusQuery.matches);
 });
 
 document.addEventListener("keydown", (event) => {
@@ -755,3 +774,4 @@ resetNavigationUi();
 setMenuOpen(false);
 setStatus("GPX 파일을 먼저 불러오세요.", "idle");
 updateQuickActionButton();
+setStatusPanelCollapsed(compactStatusQuery.matches);

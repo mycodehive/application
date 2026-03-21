@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>GPX Navi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  >
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css"
+    crossorigin=""
+  >
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <main class="map-stage">
+      <button id="menu-toggle-btn" class="menu-toggle-btn" type="button" aria-controls="side-panel" aria-expanded="false">
+        <span class="menu-toggle-icon" aria-hidden="true"></span>
+        메뉴
+      </button>
+      <div class="map-overlay">
+        <button id="quick-action-btn" class="overlay-chip overlay-action" type="button" disabled>
+          <span id="quick-action-label" class="overlay-label">현재 모드</span>
+          <strong id="quick-action-text">GPX 업로드</strong>
+        </button>
+        <div class="overlay-chip accent">
+          <span class="overlay-label">경로명</span>
+          <strong id="route-name">불러온 경로 없음</strong>
+        </div>
+      </div>
+      <div id="map" aria-label="GPX 지도"></div>
+
+      <section class="map-status-overlay" aria-live="polite">
+        <div class="section-title-row">
+          <h2>주행 상태</h2>
+          <span id="nav-state-badge" class="state-badge idle">대기</span>
+        </div>
+        <p id="status-message" class="status-message">GPX 파일을 먼저 불러오세요.</p>
+        <div class="metrics-grid compact">
+          <article class="metric">
+            <span class="metric-label">경로 길이</span>
+            <strong id="route-distance">-</strong>
+          </article>
+          <article class="metric">
+            <span class="metric-label">남은 거리</span>
+            <strong id="remaining-distance">-</strong>
+          </article>
+          <article class="metric">
+            <span class="metric-label">경로 이탈</span>
+            <strong id="off-route-distance">-</strong>
+          </article>
+          <article class="metric">
+            <span class="metric-label">현재 속도</span>
+            <strong id="current-speed">-</strong>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <aside id="side-panel" class="control-panel">
+      <div class="panel-header">
+        <div class="panel-header-top">
+          <p class="eyebrow">Route Guidance</p>
+          <button id="menu-close-btn" class="menu-close-btn" type="button" aria-label="메뉴 닫기">닫기</button>
+        </div>
+        <h1>GPX Navi</h1>
+        <p class="panel-copy">
+          GPX 파일을 읽어 경로를 표시하고, 현재 위치를 기준으로 경로 진행과 이탈 여부를 안내하는 모바일 대응 내비게이션 화면입니다.
+        </p>
+      </div>
+
+      <section class="card upload-card">
+        <label class="file-drop" for="gpx-file">
+          <input id="gpx-file" type="file" accept=".gpx,application/gpx+xml,application/xml,text/xml">
+          <span class="file-drop-title">GPX 파일 불러오기</span>
+          <span class="file-drop-copy">탭하거나 파일을 끌어다 놓으세요</span>
+        </label>
+        <div class="button-row">
+          <button id="fit-route-btn" class="ghost-button" type="button">경로 맞춤</button>
+          <button id="center-location-btn" class="ghost-button" type="button">내 위치</button>
+        </div>
+      </section>
+
+      <section class="card guidance-card">
+        <div class="section-title-row">
+          <h2>다음 안내</h2>
+          <label class="toggle">
+            <input id="voice-toggle" type="checkbox">
+            <span>음성</span>
+          </label>
+        </div>
+        <p id="next-instruction" class="instruction-text">안내 준비 중</p>
+        <dl class="detail-list">
+          <div>
+            <dt>다음 안내점</dt>
+            <dd id="next-guide-distance">-</dd>
+          </div>
+          <div>
+            <dt>진행률</dt>
+            <dd id="progress-value">-</dd>
+          </div>
+          <div>
+            <dt>GPS 정확도</dt>
+            <dd id="accuracy-value">-</dd>
+          </div>
+          <div>
+            <dt>좌표</dt>
+            <dd id="coordinate-value">-</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="card action-card">
+        <div class="button-row stacked">
+          <button id="start-nav-btn" class="primary-button" type="button">실시간 안내 시작</button>
+          <button id="stop-nav-btn" class="secondary-button" type="button" disabled>안내 중지</button>
+        </div>
+        <p class="support-text">
+          모바일 위치 추적은 브라우저 권한이 필요하며, 대부분의 브라우저에서 `localhost` 또는 HTTPS에서 가장 안정적으로 동작합니다.
+        </p>
+      </section>
+    </aside>
+    <div id="menu-backdrop" class="menu-backdrop" hidden></div>
+  </div>
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" crossorigin=""></script>
+  <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.22/leaflet-maplibre-gl.js" crossorigin=""></script>
+  <script src="./app.js"></script>
+</body>
+</html>

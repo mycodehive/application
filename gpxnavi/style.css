@@ -409,6 +409,11 @@ button:disabled {
   display: none;
 }
 
+.map-stage.hud-hidden .map-overlay,
+.map-stage.hud-hidden .map-status-overlay {
+  display: none;
+}
+
 .metrics-grid.compact {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
@@ -460,6 +465,11 @@ button:disabled {
 .overlay-action.live {
   border-color: rgba(255, 107, 107, 0.52);
   background: linear-gradient(135deg, rgba(95, 39, 52, 0.92), rgba(10, 26, 43, 0.88));
+}
+
+.ghost-button.is-active {
+  border: 1px solid rgba(79, 209, 197, 0.52);
+  background: linear-gradient(135deg, rgba(16, 70, 86, 0.86), rgba(10, 26, 43, 0.86));
 }
 
 .overlay-chip.accent {

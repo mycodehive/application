@@ -8,6 +8,7 @@ L.maplibreGL({
 }).addTo(map);
 
 const elements = {
+  mapStage: document.querySelector(".map-stage"),
   menuToggleBtn: document.getElementById("menu-toggle-btn"),
   menuCloseBtn: document.getElementById("menu-close-btn"),
   menuBackdrop: document.getElementById("menu-backdrop"),
@@ -18,6 +19,7 @@ const elements = {
   centerLocationBtn: document.getElementById("center-location-btn"),
   startNavBtn: document.getElementById("start-nav-btn"),
   stopNavBtn: document.getElementById("stop-nav-btn"),
+  toggleHudBtn: document.getElementById("toggle-hud-btn"),
   voiceToggle: document.getElementById("voice-toggle"),
   quickActionBtn: document.getElementById("quick-action-btn"),
   quickActionLabel: document.getElementById("quick-action-label"),
@@ -56,6 +58,7 @@ const state = {
   currentPosition: null,
   matchedRoute: null,
   lastAnnouncementKey: "",
+  hudHidden: false,
 };
 
 const mobileMenuQuery = window.matchMedia("(max-width: 1100px)");
@@ -77,6 +80,18 @@ function setStatusPanelCollapsed(collapsed) {
   elements.statusOverlay.classList.toggle("collapsed", shouldCollapse);
   elements.statusToggleBtn.textContent = shouldCollapse ? "펼치기" : "접기";
   elements.statusToggleBtn.setAttribute("aria-expanded", String(!shouldCollapse));
+}
+
+function setHudHidden(hidden) {
+  state.hudHidden = hidden;
+  elements.mapStage.classList.toggle("hud-hidden", hidden);
+  elements.toggleHudBtn.textContent = hidden ? "지도 정보 표시" : "지도 정보 숨기기";
+  elements.toggleHudBtn.classList.toggle("is-active", hidden);
+  elements.toggleHudBtn.setAttribute("aria-pressed", String(hidden));
+
+  requestAnimationFrame(() => {
+    map.invalidateSize();
+  });
 }
 
 function updateQuickActionButton() {
@@ -708,6 +723,13 @@ elements.menuBackdrop.addEventListener("click", () => {
   setMenuOpen(false);
 });
 
+elements.toggleHudBtn.addEventListener("click", () => {
+  setHudHidden(!state.hudHidden);
+  if (mobileMenuQuery.matches) {
+    setMenuOpen(false);
+  }
+});
+
 elements.statusToggleBtn.addEventListener("click", () => {
   const isCollapsed = elements.statusOverlay.classList.contains("collapsed");
   setStatusPanelCollapsed(!isCollapsed);
@@ -775,3 +797,4 @@ setMenuOpen(false);
 setStatus("GPX 파일을 먼저 불러오세요.", "idle");
 updateQuickActionButton();
 setStatusPanelCollapsed(compactStatusQuery.matches);
+setHudHidden(false);

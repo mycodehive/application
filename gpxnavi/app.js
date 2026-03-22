@@ -1,11 +1,16 @@
 const map = L.map("map", {
   zoomControl: true,
   preferCanvas: true,
+  zoomAnimation: false,
+  fadeAnimation: false,
+  markerZoomAnimation: false,
 }).setView([37.5665, 126.978], 13);
 
 L.maplibreGL({
   style: "https://tiles.openfreemap.org/styles/liberty",
 }).addTo(map);
+
+const FOLLOW_ZOOM_LEVEL = 18;
 
 const elements = {
   mapStage: document.querySelector(".map-stage"),
@@ -59,6 +64,8 @@ const state = {
   matchedRoute: null,
   lastAnnouncementKey: "",
   hudHidden: false,
+  wasOnRoute: false,
+  mapRotationDeg: 0,
 };
 
 const mobileMenuQuery = window.matchMedia("(max-width: 1100px)");
@@ -92,6 +99,23 @@ function setHudHidden(hidden) {
   requestAnimationFrame(() => {
     map.invalidateSize();
   });
+}
+
+function normalizeRotation(deg) {
+  const normalized = ((deg + 180) % 360 + 360) % 360 - 180;
+  return Number.isFinite(normalized) ? normalized : 0;
+}
+
+function applyMapRotation() {
+  state.mapRotationDeg = 0;
+}
+
+function setMapRotation(deg) {
+  state.mapRotationDeg = normalizeRotation(deg);
+}
+
+function resetMapRotation() {
+  setMapRotation(0);
 }
 
 function updateQuickActionButton() {
@@ -161,6 +185,10 @@ function formatCoords(lat, lng) {
   return `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
 }
 
+function computeOffRouteThreshold(accuracy) {
+  return Math.max(20, (accuracy || 0) * 1.5);
+}
+
 function toRad(value) {
   return (value * Math.PI) / 180;
 }
@@ -210,6 +238,20 @@ function directionLabel(angle) {
     return "왼쪽";
   }
   return "직진";
+}
+
+function resolveTravelHeading(position, match) {
+  if (Number.isFinite(position.heading) && position.heading >= 0) {
+    return normalizeBearing(position.heading);
+  }
+
+  const from = state.routePoints[match.segmentIndex];
+  const to = state.routePoints[match.segmentIndex + 1];
+  if (from && to) {
+    return bearingBetween(from, to);
+  }
+
+  return null;
 }
 
 function parsePoint(node) {
@@ -374,9 +416,11 @@ function loadRoute(routeData) {
   state.guidancePoints = buildGuidancePoints(routeData.points, metrics.cumulative);
   state.matchedRoute = null;
   state.lastAnnouncementKey = "";
+  state.wasOnRoute = false;
 
   drawRoute();
   resetNavigationUi();
+  resetMapRotation();
 
   elements.routeName.textContent = state.routeName;
   elements.routeDistance.textContent = formatDistance(state.totalDistance);
@@ -447,7 +491,7 @@ function buildInstruction(match, position) {
   const remaining = Math.max(0, state.totalDistance - match.progress);
   const nextGuide = getNextGuidance(match.progress);
   const distanceToGuide = Math.max(0, nextGuide.progress - match.progress);
-  const offRouteThreshold = Math.max(20, (position.accuracy || 0) * 1.5);
+  const offRouteThreshold = computeOffRouteThreshold(position.accuracy);
 
   if (remaining <= 20) {
     return {
@@ -530,10 +574,10 @@ function updateCurrentLocationLayers(position, match) {
   if (!state.currentMarker) {
     state.currentMarker = L.circleMarker(latLng, {
       radius: 8,
-      color: "#f5f7ff",
-      fillColor: "#ffffff",
+      color: "#ff4d4f",
+      fillColor: "#ff4d4f",
       fillOpacity: 1,
-      weight: 3,
+      weight: 2.5,
     }).addTo(map);
   } else {
     state.currentMarker.setLatLng(latLng);
@@ -607,6 +651,22 @@ function handlePositionUpdate(geoPosition) {
   }
 
   state.matchedRoute = match;
+
+  const offRouteThreshold = computeOffRouteThreshold(position.accuracy);
+  const onRoute = match.distance <= offRouteThreshold;
+
+  if (onRoute && !state.wasOnRoute) {
+    map.flyTo([position.lat, position.lng], Math.max(map.getZoom(), FOLLOW_ZOOM_LEVEL), {
+      duration: 0.65,
+    });
+  } else if (onRoute) {
+    if (map.getZoom() < FOLLOW_ZOOM_LEVEL) {
+      map.setZoom(FOLLOW_ZOOM_LEVEL, { animate: true });
+    }
+    map.panTo([position.lat, position.lng], { animate: false });
+  }
+
+  state.wasOnRoute = onRoute;
   updateCurrentLocationLayers(position, match);
 
   const instruction = buildInstruction(match, position);
@@ -658,6 +718,9 @@ function stopNavigation(resetStatus = true) {
   if (window.speechSynthesis) {
     window.speechSynthesis.cancel();
   }
+
+  state.wasOnRoute = false;
+  resetMapRotation();
 
   elements.startNavBtn.disabled = false;
   elements.stopNavBtn.disabled = true;

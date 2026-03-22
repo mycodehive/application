@@ -22,6 +22,7 @@ const elements = {
   fileInput: document.getElementById("gpx-file"),
   fitRouteBtn: document.getElementById("fit-route-btn"),
   centerLocationBtn: document.getElementById("center-location-btn"),
+  reverseRouteBtn: document.getElementById("reverse-route-btn"),
   startNavBtn: document.getElementById("start-nav-btn"),
   stopNavBtn: document.getElementById("stop-nav-btn"),
   toggleHudBtn: document.getElementById("toggle-hud-btn"),
@@ -770,6 +771,34 @@ function handleFileSelection(file) {
   });
 }
 
+function reverseRoute() {
+  if (state.routePoints.length < 2) {
+    setStatus("반전할 경로가 없습니다. GPX 파일을 먼저 불러오세요.", "idle");
+    return;
+  }
+
+  stopNavigation();
+
+  state.routePoints = [...state.routePoints].reverse();
+  const metrics = computeRouteMetrics(state.routePoints);
+  state.cumulativeDistances = metrics.cumulative;
+  state.segmentDistances = metrics.segments;
+  state.totalDistance = metrics.total;
+  state.guidancePoints = buildGuidancePoints(state.routePoints, metrics.cumulative);
+  state.matchedRoute = null;
+  state.lastAnnouncementKey = "";
+  state.wasOnRoute = false;
+
+  drawRoute();
+  resetNavigationUi();
+  resetMapRotation();
+
+  elements.routeDistance.textContent = formatDistance(state.totalDistance);
+  elements.remainingDistance.textContent = formatDistance(state.totalDistance);
+  setStatus("경로를 반전했습니다. 출발점과 도착점이 바뀌었습니다.", "ready");
+  updateQuickActionButton();
+}
+
 elements.fileInput.addEventListener("change", (event) => {
   handleFileSelection(event.target.files?.[0]);
 });
@@ -828,6 +857,7 @@ document.addEventListener("keydown", (event) => {
 
 elements.fitRouteBtn.addEventListener("click", fitRoute);
 elements.centerLocationBtn.addEventListener("click", centerCurrentLocation);
+elements.reverseRouteBtn.addEventListener("click", reverseRoute);
 elements.startNavBtn.addEventListener("click", () => {
   startNavigation();
   if (mobileMenuQuery.matches) {

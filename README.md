@@ -11,3 +11,9 @@
 
 ### mindmap
  - https://mycodehive.github.io/application/mindmap/
+
+### myactivity
+ - https://mycodehive.github.io/application/myactivity/150km.html
+
+### 자전거 휴대승차 가능 여부 정리
+- https://mycodehive.github.io/application/bicycle_transport/index.html

@@ -17,3 +17,6 @@
 
 ### 자전거 휴대승차 가능 여부 정리
 - https://mycodehive.github.io/application/bicycle_transport/index.html
+
+### Lotto 생성기
+- https://mycodehive.github.io/application/lotto/lotto.html

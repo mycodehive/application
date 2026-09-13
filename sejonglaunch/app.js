@@ -144,7 +144,7 @@ function shuffleArray(items){
 }
 
 function buildNaverMapUrl(restaurant){
-  const query = `${restaurant.name || ""} ${restaurant.address || ""}`.trim();
+  const query = String(restaurant.name || "").trim();
   return `https://map.naver.com/p/search/${encodeURIComponent(query)}`;
 }
 

@@ -285,3 +285,24 @@ select:focus{border-color:#9eb6d0;box-shadow:0 0 0 4px #edf3fb}
   .result-summary{align-items:stretch;flex-direction:column}
   .reroll-all{width:100%}
 }
+
+/* v2.3 - 추천 결과는 개수와 관계없이 항상 세로 1열 full width */
+.result-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  width: 100%;
+}
+
+.result-grid .result-card {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+}
+
+/* 데스크톱에서도 2~3개 결과를 가로 배치하지 않는다. */
+@media (min-width: 901px) {
+  .result-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

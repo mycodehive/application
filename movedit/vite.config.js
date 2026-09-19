@@ -1,12 +1,15 @@
 import { defineConfig } from "vite";
 
 export default defineConfig({
+  root: "source",
   base: "./",
+  publicDir: false,
   build: {
     target: "es2022",
-    outDir: "dist",
+    outDir: "../dist",
+    assetsDir: "bundle",
     emptyOutDir: true,
-    sourcemap: true
+    sourcemap: false
   },
   server: {
     headers: {

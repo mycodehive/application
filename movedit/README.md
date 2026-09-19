@@ -273,3 +273,30 @@ Safari / Firefox는 코덱, WebAssembly 메모리, SharedArrayBuffer 정책 차�
 TESTING.md에 MVP 필수 시나리오 체크리스트를 분리했습니다.
 
 브라우저 영상 렌더링은 실제 미디어/브라우저/메모리 조건에 따라 달라지므로 배포 전 대상 브라우저에서 테스트 파일로 확인해야 합니다.
+
+
+## GitHub Pages 자동 배포
+
+MovEdit의 개발 원본은 `movedit/source/`에 보관합니다.
+
+`.github/workflows/build-movedit.yml`이 다음 변경을 감지하면 자동으로 Vite Build를 실행합니다.
+
+- `movedit/source/**`
+- `movedit/package.json`
+- `movedit/vite.config.js`
+
+빌드 결과는 다음 위치로 다시 커밋됩니다.
+
+~~~text
+movedit/
+├── index.html       # GitHub Pages가 직접 여는 빌드 결과
+└── bundle/          # Vite가 생성한 JS/CSS 번들
+~~~
+
+따라서 GitHub Pages에서는 별도의 npm 실행 없이 아래 주소에서 바로 실행됩니다.
+
+~~~text
+https://github.writeaday.click/application/movedit/
+~~~
+
+소스를 수정할 때는 배포용 `movedit/index.html`을 직접 수정하지 말고 `movedit/source/` 아래 파일을 수정합니다.

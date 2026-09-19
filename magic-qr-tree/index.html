@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Magic QR Tree</title>
 <style>
-:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#f7f3ee;background:#151816;color-scheme:dark}*{box-sizing:border-box}html,body,#app{margin:0;width:100%;height:100%;overflow:hidden}body{background:radial-gradient(circle at 50% 35%,#3f4d42 0,#1c211e 48%,#0d0f0e 100%)}#scene{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}.vignette{pointer-events:none;position:absolute;inset:0;background:radial-gradient(circle at center,transparent 30%,rgba(0,0,0,.55) 100%)}.glass{backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);background:rgba(25,29,26,.48);border:1px solid rgba(255,255,255,.12);box-shadow:0 18px 50px rgba(0,0,0,.22)}.topbar{position:absolute;left:24px;right:24px;top:20px;height:72px;border-radius:22px;padding:12px 14px 12px 18px;display:flex;align-items:center;justify-content:space-between}.brand{display:flex;align-items:center;gap:12px}.brand-mark{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(145deg,#f7e6a5,#cb9277);color:#20241f;font-size:22px}.brand strong{display:block;font-size:16px;letter-spacing:.1px}.brand small{display:block;margin-top:2px;color:rgba(255,255,255,.58);font-size:12px}.icon-btn,.primary,.segmented button,.scan-pill{border:0;color:inherit;cursor:pointer}.icon-btn{width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.09);font-size:20px}.composer{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);width:min(680px,calc(100vw - 34px));padding:18px;border-radius:26px}.composer label{font-size:13px;color:rgba(255,255,255,.7);display:block;margin:0 0 9px 2px}.input-row{display:flex;gap:9px}.input-row input{flex:1;min-width:0;height:48px;border-radius:15px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.22);color:#fff;padding:0 15px;font-size:15px;outline:none}.input-row input:focus{border-color:rgba(255,255,255,.32);box-shadow:0 0 0 4px rgba(255,255,255,.05)}.primary{height:48px;padding:0 22px;border-radius:15px;background:linear-gradient(135deg,#f0dbc3,#cf9b7f);color:#2a241f;font-weight:800}.segmented{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:rgba(0,0,0,.18);padding:5px;border-radius:15px;margin-top:12px}.segmented button{height:38px;border-radius:11px;background:transparent;color:rgba(255,255,255,.55);font-weight:650}.segmented button.active{background:rgba(255,255,255,.12);color:#fff}.hint{font-size:11px;color:rgba(255,255,255,.42);text-align:center;margin-top:10px}.status{position:absolute;left:50%;top:112px;transform:translateX(-50%);padding:8px 13px;border-radius:999px;font-size:12px;color:rgba(255,255,255,.72);opacity:0;transition:.25s}.status.show{opacity:1}.scan-pill{position:absolute;right:24px;bottom:27px;border-radius:999px;padding:11px 16px;font-size:12px;color:rgba(255,255,255,.8)}@media(max-width:760px){.topbar{left:14px;right:14px;top:14px}.brand small{display:none}.composer{bottom:14px}.scan-pill{display:none}}
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#f7f3ee;background:#151816;color-scheme:dark}*{box-sizing:border-box}html,body,#app{margin:0;width:100%;height:100%;overflow:hidden}body{background:radial-gradient(circle at 50% 35%,#3f4d42 0,#1c211e 48%,#0d0f0e 100%)}#scene{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}.vignette{pointer-events:none;position:absolute;inset:0;background:radial-gradient(circle at center,transparent 30%,rgba(0,0,0,.55) 100%)}.glass{backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);background:rgba(25,29,26,.48);border:1px solid rgba(255,255,255,.12);box-shadow:0 18px 50px rgba(0,0,0,.22)}.topbar{position:absolute;left:24px;right:24px;top:20px;height:72px;border-radius:22px;padding:12px 14px 12px 18px;display:flex;align-items:center;justify-content:space-between}.brand{display:flex;align-items:center;gap:12px}.brand-mark{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(145deg,#f7e6a5,#cb9277);color:#20241f;font-size:22px}.brand strong{display:block;font-size:16px;letter-spacing:.1px}.brand small{display:block;margin-top:2px;color:rgba(255,255,255,.58);font-size:12px}.icon-btn,.primary,.segmented button,.scan-pill{border:0;color:inherit;cursor:pointer}.icon-btn{width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.09);font-size:20px}.composer{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);width:min(680px,calc(100vw - 34px));padding:18px;border-radius:26px}.composer.share-hidden{display:none}.composer label{font-size:13px;color:rgba(255,255,255,.7);display:block;margin:0 0 9px 2px}.input-row{display:flex;gap:9px}.input-row input{flex:1;min-width:0;height:48px;border-radius:15px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.22);color:#fff;padding:0 15px;font-size:15px;outline:none}.input-row input:focus{border-color:rgba(255,255,255,.32);box-shadow:0 0 0 4px rgba(255,255,255,.05)}.primary{height:48px;padding:0 22px;border-radius:15px;background:linear-gradient(135deg,#f0dbc3,#cf9b7f);color:#2a241f;font-weight:800}.segmented{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:rgba(0,0,0,.18);padding:5px;border-radius:15px;margin-top:12px}.segmented button{height:38px;border-radius:11px;background:transparent;color:rgba(255,255,255,.55);font-weight:650}.segmented button.active{background:rgba(255,255,255,.12);color:#fff}.hint{font-size:11px;color:rgba(255,255,255,.42);text-align:center;margin-top:10px}.status{position:absolute;left:50%;top:112px;transform:translateX(-50%);padding:8px 13px;border-radius:999px;font-size:12px;color:rgba(255,255,255,.72);opacity:0;transition:.25s}.status.show{opacity:1}.scan-pill{position:absolute;right:24px;bottom:27px;border-radius:999px;padding:11px 16px;font-size:12px;color:rgba(255,255,255,.8)}@media(max-width:760px){.topbar{left:14px;right:14px;top:14px}.brand small{display:none}.composer{bottom:14px}.scan-pill{display:none}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 <script type="importmap">
@@ -244,7 +244,9 @@ function grow(){
     matrix=data.matrix;
     qrSize=data.size;
     applySeason();
+    const currentParams=new URLSearchParams(location.search);
     const qs=new URLSearchParams({q:value,s:season});
+    if(currentParams.get('h')==='true') qs.set('h','true');
     history.replaceState(null,'','?'+qs);
     setTimeout(()=>showStatus(`QR ${qrSize}×${qrSize} · ready`,true),250);
     setTimeout(()=>showStatus('',false),1500);
@@ -294,7 +296,9 @@ document.querySelectorAll('#seasonControls button').forEach(btn=>btn.onclick=()=
 
 document.querySelector('#shareBtn').onclick=async()=>{
   try{
-    await navigator.clipboard.writeText(location.href);
+    const shareUrl=new URL(location.href);
+    shareUrl.searchParams.set('h','true');
+    await navigator.clipboard.writeText(shareUrl.toString());
     showStatus('Share link copied',true);
   }catch{
     showStatus('Copy blocked by browser',true);
@@ -346,7 +350,8 @@ function animate(now){
 }
 
 const params=new URLSearchParams(location.search);
-const q=params.get('q'), s=params.get('s');
+const q=params.get('q'), s=params.get('s'), h=params.get('h');
+if(h==='true') document.querySelector('section.composer.glass')?.classList.add('share-hidden');
 if(q) document.querySelector('#urlInput').value=q;
 if(s && palettes[s]){
   season=s;

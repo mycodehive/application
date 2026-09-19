@@ -8,6 +8,7 @@ export const CONFIG = {
   minClipDuration: 0.1,
   pixelsPerSecond: 50,
   historyLimit: 80,
+  snapThresholdPx: 14,
   largeFileBytes: 500 * 1024 * 1024,
   ffmpeg: {
     packageVersion: "0.12.15",

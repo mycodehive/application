@@ -4,6 +4,23 @@ import { addAsset, addClip, getState } from "./state.js";
 const isVideo = file => file.type.startsWith("video/") || /\.(mp4|webm|mov|m4v|avi|mkv)$/i.test(file.name);
 const isImage = file => file.type.startsWith("image/") || /\.(jpe?g|png|webp)$/i.test(file.name);
 
+function coverRect(asset, project) {
+  const sourceWidth = Math.max(1, Number(asset.width) || project.resolution.width);
+  const sourceHeight = Math.max(1, Number(asset.height) || project.resolution.height);
+  const scale = Math.max(
+    project.resolution.width / sourceWidth,
+    project.resolution.height / sourceHeight
+  );
+  const width = sourceWidth * scale;
+  const height = sourceHeight * scale;
+  return {
+    x: (project.resolution.width - width) / 2,
+    y: (project.resolution.height - height) / 2,
+    width,
+    height
+  };
+}
+
 function videoMetadata(file, url) {
   return new Promise((resolve, reject) => {
     const video = document.createElement("video");
@@ -74,6 +91,8 @@ export function addAssetToTimeline(assetId, preferredTime = null) {
   const asset = project.assets.find(a => a.id === assetId);
   if (!asset) return null;
 
+  const fitted = coverRect(asset, project);
+
   if (asset.kind === "video") {
     const videoClips = project.clips.filter(c => c.track === "video1");
     const end = videoClips.reduce((max, clip) => Math.max(max, clip.timelineStart + clip.duration), 0);
@@ -87,13 +106,11 @@ export function addAssetToTimeline(assetId, preferredTime = null) {
       duration: asset.duration,
       sourceIn: 0,
       sourceOut: asset.duration,
-      width: project.resolution.width,
-      height: project.resolution.height
+      fitMode: "cover",
+      ...fitted
     });
   }
 
-  const maxW = project.resolution.width * 0.45;
-  const scale = Math.min(1, maxW / asset.width);
   return addClip({
     assetId: asset.id,
     name: asset.name,
@@ -103,10 +120,8 @@ export function addAssetToTimeline(assetId, preferredTime = null) {
     duration: 5,
     sourceIn: 0,
     sourceOut: 5,
-    width: Math.round(asset.width * scale),
-    height: Math.round(asset.height * scale),
-    x: Math.round((project.resolution.width - asset.width * scale) / 2),
-    y: Math.round((project.resolution.height - asset.height * scale) / 2)
+    fitMode: "cover",
+    ...fitted
   });
 }
 

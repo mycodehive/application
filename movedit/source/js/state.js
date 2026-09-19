@@ -28,6 +28,21 @@ const future = [];
 const cloneProject = value => JSON.parse(JSON.stringify(value));
 const snapshot = () => cloneProject(project);
 
+function coverRect(asset, width, height) {
+  if (!asset) return { x: 0, y: 0, width, height };
+  const sourceWidth = Math.max(1, Number(asset.width) || width);
+  const sourceHeight = Math.max(1, Number(asset.height) || height);
+  const scale = Math.max(width / sourceWidth, height / sourceHeight);
+  const fittedWidth = sourceWidth * scale;
+  const fittedHeight = sourceHeight * scale;
+  return {
+    x: (width - fittedWidth) / 2,
+    y: (height - fittedHeight) / 2,
+    width: fittedWidth,
+    height: fittedHeight
+  };
+}
+
 function emit(reason = "change") {
   listeners.forEach(fn => fn({ project, selected, playhead, playing, zoom, reason }));
 }
@@ -104,11 +119,10 @@ export function setProjectAspectRatio(aspectRatio) {
     const overlayScale = Math.min(scaleX, scaleY);
 
     p.clips.forEach(clip => {
-      if (clip.track === "video1") {
-        clip.x = 0;
-        clip.y = 0;
-        clip.width = newWidth;
-        clip.height = newHeight;
+      if (clip.track === "video1" || clip.fitMode === "cover") {
+        const asset = p.assets.find(item => item.id === clip.assetId);
+        Object.assign(clip, coverRect(asset, newWidth, newHeight));
+        clip.fitMode = "cover";
         return;
       }
 
@@ -173,8 +187,9 @@ export function addClip(data) {
     sourceIn: data.sourceIn || 0,
     sourceOut: data.sourceOut ?? data.duration ?? 1,
     track: data.track || "video1",
-    x: data.x || 0,
-    y: data.y || 0,
+    fitMode: data.fitMode || "manual",
+    x: data.x ?? 0,
+    y: data.y ?? 0,
     width: data.width || project.resolution.width,
     height: data.height || project.resolution.height,
     opacity: data.opacity ?? 1,

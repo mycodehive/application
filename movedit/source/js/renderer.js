@@ -99,7 +99,7 @@ async function normalizeMainClips(project, plan, fileNames, progress) {
     const out = "main_" + i + ".mp4";
     progress?.("클립 정규화 " + (i+1) + "/" + plan.mainClips.length);
     const hasAudio = await ffmpegService.probeHasAudio(input);
-    const videoFilter = "scale=" + plan.width + ":" + plan.height + ":force_original_aspect_ratio=decrease,pad=" + plan.width + ":" + plan.height + ":(ow-iw)/2:(oh-ih)/2:black,fps=" + plan.fps + ",setsar=1";
+    const videoFilter = "scale=" + plan.width + ":" + plan.height + ":force_original_aspect_ratio=increase,crop=" + plan.width + ":" + plan.height + ":(iw-ow)/2:(ih-oh)/2,fps=" + plan.fps + ",setsar=1";
     const args = ["-y","-ss",String(clip.sourceIn),"-t",String(clip.duration),"-i",input];
 
     if (hasAudio) {
@@ -182,14 +182,20 @@ async function addVisualInputs(project, plan, fileNames, normalizedCount, args, 
     const idx = inputIndex++;
     const ov = "ov" + i;
     const next = "vov" + i;
+    const scaleX = plan.width / project.resolution.width;
+    const scaleY = plan.height / project.resolution.height;
+    const renderWidth = Math.max(1, Math.round(clip.width * scaleX));
+    const renderHeight = Math.max(1, Math.round(clip.height * scaleY));
+    const renderX = Math.round(clip.x * scaleX);
+    const renderY = Math.round(clip.y * scaleY);
     filters.push(
-      "[" + idx + ":v]scale=" + Math.round(clip.width) + ":" + Math.round(clip.height) +
+      "[" + idx + ":v]scale=" + renderWidth + ":" + renderHeight +
       ",format=rgba,colorchannelmixer=aa=" + (clip.opacity ?? 1) +
       ",setpts=PTS-STARTPTS+" + clip.timelineStart + "/TB[" + ov + "]"
     );
     filters.push(
-      "[" + currentVideo + "][" + ov + "]overlay=x=" + Math.round(clip.x) +
-      ":y=" + Math.round(clip.y) +
+      "[" + currentVideo + "][" + ov + "]overlay=x=" + renderX +
+      ":y=" + renderY +
       ":enable='between(t," + clip.timelineStart + "," + (clip.timelineStart + clip.duration) + ")'[" + next + "]"
     );
     currentVideo = next;

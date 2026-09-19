@@ -1,5 +1,5 @@
 import { getObjectUrl, getState, setPlayhead, setPlaying, subscribe, updateClip } from "./state.js";
-import { clamp } from "./config.js";
+import { CONFIG, clamp } from "./config.js";
 
 export function formatTime(seconds = 0) {
   const ms = Math.max(0, Math.floor(seconds * 1000));
@@ -21,6 +21,62 @@ export function initPreview({ canvas, empty, scrub, currentEl, totalEl, playBtn,
   let raf = 0;
   let lastFrame = performance.now();
   let overlayDrag = null;
+  let snapGuides = { left:false, right:false, top:false, bottom:false };
+
+  function snapThreshold(project) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: CONFIG.snapThresholdPx * project.resolution.width / Math.max(1, rect.width),
+      y: CONFIG.snapThresholdPx * project.resolution.height / Math.max(1, rect.height)
+    };
+  }
+
+  function snapPosition(x, y, width, height, project) {
+    const threshold = snapThreshold(project);
+    const result = { x, y, guides:{left:false,right:false,top:false,bottom:false} };
+    const maxX = project.resolution.width;
+    const maxY = project.resolution.height;
+
+    if (Math.abs(x) <= threshold.x) {
+      result.x = 0;
+      result.guides.left = true;
+    }
+    if (Math.abs((x + width) - maxX) <= threshold.x) {
+      result.x = maxX - width;
+      result.guides.right = true;
+    }
+    if (Math.abs(y) <= threshold.y) {
+      result.y = 0;
+      result.guides.top = true;
+    }
+    if (Math.abs((y + height) - maxY) <= threshold.y) {
+      result.y = maxY - height;
+      result.guides.bottom = true;
+    }
+
+    return result;
+  }
+
+  function drawSnapGuides(project) {
+    if (!Object.values(snapGuides).some(Boolean)) return;
+    ctx.save();
+    ctx.strokeStyle = "#67d4ff";
+    ctx.lineWidth = 2;
+    ctx.setLineDash([7,5]);
+    if (snapGuides.left) {
+      ctx.beginPath(); ctx.moveTo(1,0); ctx.lineTo(1,canvas.height); ctx.stroke();
+    }
+    if (snapGuides.right) {
+      ctx.beginPath(); ctx.moveTo(canvas.width-1,0); ctx.lineTo(canvas.width-1,canvas.height); ctx.stroke();
+    }
+    if (snapGuides.top) {
+      ctx.beginPath(); ctx.moveTo(0,1); ctx.lineTo(canvas.width,1); ctx.stroke();
+    }
+    if (snapGuides.bottom) {
+      ctx.beginPath(); ctx.moveTo(0,canvas.height-1); ctx.lineTo(canvas.width,canvas.height-1); ctx.stroke();
+    }
+    ctx.restore();
+  }
 
   function getMedia(clip) {
     const url = getObjectUrl(clip.assetId);
@@ -102,15 +158,15 @@ export function initPreview({ canvas, empty, scrub, currentEl, totalEl, playBtn,
       const sourceRatio = media.videoWidth / media.videoHeight;
       const canvasRatio = canvas.width / canvas.height;
       if (sourceRatio > canvasRatio) {
-        w = canvas.width;
-        h = canvas.width / sourceRatio;
-        x = 0;
-        y = (canvas.height - h) / 2;
-      } else {
         h = canvas.height;
         w = canvas.height * sourceRatio;
         y = 0;
         x = (canvas.width - w) / 2;
+      } else {
+        w = canvas.width;
+        h = canvas.width / sourceRatio;
+        x = 0;
+        y = (canvas.height - h) / 2;
       }
     }
 
@@ -161,6 +217,7 @@ export function initPreview({ canvas, empty, scrub, currentEl, totalEl, playBtn,
       .forEach(clip => drawClip(clip, getMedia(clip), project, playhead));
 
     project.subtitles.filter(s => playhead >= s.startTime && playhead < s.endTime).forEach(s => drawSubtitle(s, project));
+    drawSnapGuides(project);
 
     empty.classList.toggle("hidden", Boolean(project.clips.length || project.subtitles.length));
     currentEl.textContent = formatTime(playhead);
@@ -232,15 +289,45 @@ export function initPreview({ canvas, empty, scrub, currentEl, totalEl, playBtn,
     const c = overlayDrag.initial;
     if (overlayDrag.resize) {
       const ratio = c.width / c.height;
-      const width = Math.max(24, c.width + dx);
-      const height = event.shiftKey ? width / ratio : Math.max(24, c.height + dy);
-      updateClip(c.id,{width,height},"overlay-resize");
+      let width = Math.max(24, c.width + dx);
+      let height = event.shiftKey ? width / ratio : Math.max(24, c.height + dy);
+      const threshold = snapThreshold(state.project);
+      snapGuides = { left:false, right:false, top:false, bottom:false };
+
+      if (Math.abs((c.x + width) - state.project.resolution.width) <= threshold.x) {
+        width = state.project.resolution.width - c.x;
+        if (event.shiftKey) height = width / ratio;
+        snapGuides.right = true;
+      }
+      if (Math.abs((c.y + height) - state.project.resolution.height) <= threshold.y) {
+        height = state.project.resolution.height - c.y;
+        if (event.shiftKey) width = height * ratio;
+        snapGuides.bottom = true;
+      }
+
+      updateClip(c.id,{width,height,fitMode:"manual"},"overlay-resize");
     } else {
-      updateClip(c.id,{x:c.x+dx,y:c.y+dy},"overlay-move");
+      let x = c.x + dx;
+      let y = c.y + dy;
+      const snapped = snapPosition(x, y, c.width, c.height, state.project);
+      x = snapped.x;
+      y = snapped.y;
+      snapGuides = snapped.guides;
+
+      if (c.fitMode === "cover") {
+        x = clamp(x, state.project.resolution.width - c.width, 0);
+        y = clamp(y, state.project.resolution.height - c.height, 0);
+      }
+
+      updateClip(c.id,{x,y},"overlay-move");
     }
   });
 
-  canvas.addEventListener("pointerup", () => { overlayDrag = null; });
+  canvas.addEventListener("pointerup", () => {
+    overlayDrag = null;
+    snapGuides = { left:false, right:false, top:false, bottom:false };
+    renderFrame(getState());
+  });
 
   subscribe(state => {
     playBtn.textContent = state.playing ? "❚❚" : "▶";

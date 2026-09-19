@@ -135,14 +135,13 @@ const timelineApi = initTimeline({
     if (!clip) return;
     const asset = getState().project.assets.find(a => a.id === assetId);
     if (trackId === "overlay" && asset?.kind === "video") {
-      const w = Math.round(getState().project.resolution.width * 0.34);
-      const h = Math.round(w * asset.height / asset.width);
       updateClip(clip.id, {
-        track:"overlay", type:"video", width:w, height:h,
-        x:getState().project.resolution.width - w - 60, y:60
+        track:"overlay",
+        type:"video",
+        fitMode:"cover"
       }, "overlay-add");
     } else if (asset?.kind === "image") {
-      updateClip(clip.id, { track:"image" }, "image-add");
+      updateClip(clip.id, { track:"image", fitMode:"cover" }, "image-add");
     }
   }
 });
@@ -196,8 +195,13 @@ function bindNumber(el, getter, patchKey, subtitle = false) {
     const selected = getState().selected;
     if (!selected) return;
     const value = Number(el.value);
-    if (subtitle) updateSubtitle(selected.id, { [patchKey]: value });
-    else updateClip(selected.id, { [patchKey]: value });
+    if (subtitle) {
+      updateSubtitle(selected.id, { [patchKey]: value });
+    } else {
+      const patch = { [patchKey]: value };
+      if (["x","y","width","height"].includes(patchKey)) patch.fitMode = "manual";
+      updateClip(selected.id, patch);
+    }
   });
 }
 [

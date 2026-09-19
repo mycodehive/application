@@ -55,8 +55,9 @@ async function subtitlePng(sub, project, width, height) {
 }
 
 export function buildRenderPlan(project, quality = "1080p") {
-  const width = quality === "720p" ? 1280 : 1920;
-  const height = quality === "720p" ? 720 : 1080;
+  const portrait = Number(project.resolution?.height) > Number(project.resolution?.width);
+  const width = quality === "720p" ? (portrait ? 720 : 1280) : (portrait ? 1080 : 1920);
+  const height = quality === "720p" ? (portrait ? 1280 : 720) : (portrait ? 1920 : 1080);
   const mainClips = project.clips.filter(c => c.track === "video1").sort((a,b) => a.timelineStart - b.timelineStart);
   const overlays = project.clips.filter(c => c.track === "overlay" || c.track === "image").sort((a,b) => a.timelineStart - b.timelineStart);
   return {

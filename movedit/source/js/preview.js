@@ -96,7 +96,24 @@ export function initPreview({ canvas, empty, scrub, currentEl, totalEl, playBtn,
     }
     const sx = canvas.width / project.resolution.width;
     const sy = canvas.height / project.resolution.height;
-    const x = clip.x * sx, y = clip.y * sy, w = clip.width * sx, h = clip.height * sy;
+    let x = clip.x * sx, y = clip.y * sy, w = clip.width * sx, h = clip.height * sy;
+
+    if (clip.track === "video1" && media.videoWidth && media.videoHeight) {
+      const sourceRatio = media.videoWidth / media.videoHeight;
+      const canvasRatio = canvas.width / canvas.height;
+      if (sourceRatio > canvasRatio) {
+        w = canvas.width;
+        h = canvas.width / sourceRatio;
+        x = 0;
+        y = (canvas.height - h) / 2;
+      } else {
+        h = canvas.height;
+        w = canvas.height * sourceRatio;
+        y = 0;
+        x = (canvas.width - w) / 2;
+      }
+    }
+
     ctx.globalAlpha = (clip.opacity ?? 1) * alpha;
     try { ctx.drawImage(media, x, y, w, h); } catch {}
     ctx.globalAlpha = 1;
@@ -110,8 +127,11 @@ export function initPreview({ canvas, empty, scrub, currentEl, totalEl, playBtn,
 
   function renderFrame(state = getState()) {
     const { project, playhead } = state;
-    canvas.width = 960;
-    canvas.height = Math.round(960 * project.resolution.height / project.resolution.width);
+    const projectWidth = Number(project.resolution.width) || 1920;
+    const projectHeight = Number(project.resolution.height) || 1080;
+    const landscape = projectWidth >= projectHeight;
+    canvas.width = landscape ? 960 : Math.round(960 * projectWidth / projectHeight);
+    canvas.height = landscape ? Math.round(960 * projectHeight / projectWidth) : 960;
     ctx.fillStyle = "#000"; ctx.fillRect(0,0,canvas.width,canvas.height);
 
     syncVideoPlayback(state);

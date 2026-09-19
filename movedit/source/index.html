@@ -20,6 +20,13 @@
       </div>
       <div class="top-actions">
         <input id="projectName" class="project-name" value="새 프로젝트" aria-label="프로젝트명">
+        <label class="aspect-control" title="프로젝트 화면 비율">
+          <span>Canvas</span>
+          <select id="aspectRatioSelect" aria-label="캔버스 화면 비율">
+            <option value="16:9">16:9 가로</option>
+            <option value="9:16">9:16 세로</option>
+          </select>
+        </label>
         <button id="undoBtn" class="tool-btn" title="실행 취소 (Ctrl/Cmd+Z)">↶ Undo</button>
         <button id="redoBtn" class="tool-btn" title="다시 실행 (Ctrl/Cmd+Shift+Z)">↷ Redo</button>
         <button id="saveProjectBtn" class="tool-btn">프로젝트 저장</button>

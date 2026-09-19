@@ -1,5 +1,9 @@
 export const CONFIG = {
   resolution: { width: 1920, height: 1080 },
+  canvasPresets: {
+    "16:9": { width: 1920, height: 1080, label: "16:9 가로" },
+    "9:16": { width: 1080, height: 1920, label: "9:16 세로" }
+  },
   fps: 30,
   minClipDuration: 0.1,
   pixelsPerSecond: 50,

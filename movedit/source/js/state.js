@@ -3,6 +3,7 @@ import { CONFIG, uid } from "./config.js";
 const createProject = () => ({
   version: 1,
   name: "새 프로젝트",
+  aspectRatio: "16:9",
   resolution: { ...CONFIG.resolution },
   fps: CONFIG.fps,
   duration: 0,
@@ -82,6 +83,56 @@ export function mutate(label, fn, options = {}) {
 export function setProjectName(name) {
   project.name = name || "새 프로젝트";
   emit("project-name");
+}
+
+export function setProjectAspectRatio(aspectRatio) {
+  const preset = CONFIG.canvasPresets[aspectRatio];
+  if (!preset) return;
+
+  mutate("project-aspect-ratio", p => {
+    const oldWidth = Number(p.resolution?.width) || CONFIG.resolution.width;
+    const oldHeight = Number(p.resolution?.height) || CONFIG.resolution.height;
+    const newWidth = preset.width;
+    const newHeight = preset.height;
+    if (oldWidth === newWidth && oldHeight === newHeight) {
+      p.aspectRatio = aspectRatio;
+      return;
+    }
+
+    const scaleX = newWidth / oldWidth;
+    const scaleY = newHeight / oldHeight;
+    const overlayScale = Math.min(scaleX, scaleY);
+
+    p.clips.forEach(clip => {
+      if (clip.track === "video1") {
+        clip.x = 0;
+        clip.y = 0;
+        clip.width = newWidth;
+        clip.height = newHeight;
+        return;
+      }
+
+      const oldCenterX = (Number(clip.x) || 0) + (Number(clip.width) || oldWidth) / 2;
+      const oldCenterY = (Number(clip.y) || 0) + (Number(clip.height) || oldHeight) / 2;
+      const width = Math.max(1, (Number(clip.width) || oldWidth) * overlayScale);
+      const height = Math.max(1, (Number(clip.height) || oldHeight) * overlayScale);
+      const centerX = (oldCenterX / oldWidth) * newWidth;
+      const centerY = (oldCenterY / oldHeight) * newHeight;
+
+      clip.width = width;
+      clip.height = height;
+      clip.x = Math.min(newWidth - width, Math.max(0, centerX - width / 2));
+      clip.y = Math.min(newHeight - height, Math.max(0, centerY - height / 2));
+    });
+
+    const textScale = newWidth / oldWidth;
+    p.subtitles.forEach(sub => {
+      sub.fontSize = Math.max(12, Math.round((Number(sub.fontSize) || 42) * textScale));
+    });
+
+    p.aspectRatio = aspectRatio;
+    p.resolution = { width: newWidth, height: newHeight };
+  });
 }
 
 export function setSelected(kind, id) {
@@ -269,6 +320,9 @@ export function exportProject() {
 export function importProject(data) {
   pushHistory();
   project = { ...createProject(), ...data };
+  if (!project.aspectRatio) {
+    project.aspectRatio = Number(project.resolution?.height) > Number(project.resolution?.width) ? "9:16" : "16:9";
+  }
   project.assets = Array.isArray(data.assets) ? data.assets : [];
   project.clips = Array.isArray(data.clips) ? data.clips : [];
   project.subtitles = Array.isArray(data.subtitles) ? data.subtitles : [];

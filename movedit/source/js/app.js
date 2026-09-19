@@ -1,4 +1,4 @@
-import { getObjectUrl, getRuntimeFile, getState, subscribe, setProjectName, setPlayhead, setSelected, updateClip, updateSubtitle, setTransition, undo, redo, removeSelected, splitSelectedClip, addSubtitle, exportProject, importProject, relinkAsset } from "./state.js";
+import { getObjectUrl, getRuntimeFile, getState, subscribe, setProjectName, setProjectAspectRatio, setPlayhead, setSelected, updateClip, updateSubtitle, setTransition, undo, redo, removeSelected, splitSelectedClip, addSubtitle, exportProject, importProject, relinkAsset } from "./state.js";
 import { importMediaFiles, addAssetToTimeline, createThumbnail } from "./media.js";
 import { initTimeline } from "./timeline.js";
 import { initPreview } from "./preview.js";
@@ -8,7 +8,7 @@ import { CONFIG } from "./config.js";
 
 const $ = id => document.getElementById(id);
 const els = {
-  projectName:$("projectName"), undo:$("undoBtn"), redo:$("redoBtn"), saveProject:$("saveProjectBtn"),
+  projectName:$("projectName"), aspectRatio:$("aspectRatioSelect"), undo:$("undoBtn"), redo:$("redoBtn"), saveProject:$("saveProjectBtn"),
   projectFile:$("projectFileInput"), render:$("renderBtn"), mediaInput:$("mediaInput"), dropZone:$("dropZone"),
   mediaList:$("mediaList"), engineStatus:$("engineStatus"), engineHint:$("engineHint"),
   canvas:$("previewCanvas"), previewStage:$("previewStage"), previewEmpty:$("previewEmpty"),
@@ -162,6 +162,11 @@ els.deleteBtn.addEventListener("click", removeSelected);
 els.deleteClip.addEventListener("click", removeSelected);
 els.deleteSubtitle.addEventListener("click", removeSelected);
 els.zoom.addEventListener("change", () => timelineApi.setZoom(els.zoom.value));
+els.aspectRatio.addEventListener("change", () => {
+  setProjectAspectRatio(els.aspectRatio.value);
+  const p = getState().project;
+  toast("Canvas를 " + els.aspectRatio.value + " · " + p.resolution.width + "×" + p.resolution.height + "로 변경했습니다.", "ok");
+});
 els.undo.addEventListener("click", undo);
 els.redo.addEventListener("click", redo);
 els.projectName.addEventListener("change", () => setProjectName(els.projectName.value));
@@ -267,6 +272,11 @@ function renderInspector(state) {
 
 subscribe(state => {
   els.projectName.value = state.project.name;
+  const aspect = state.project.aspectRatio || (state.project.resolution.height > state.project.resolution.width ? "9:16" : "16:9");
+  els.aspectRatio.value = aspect;
+  const portrait = aspect === "9:16";
+  quality.options[0].textContent = "1080p · " + (portrait ? "1080×1920" : "1920×1080");
+  quality.options[1].textContent = "720p · " + (portrait ? "720×1280" : "1280×720");
   renderMediaList(state);
   renderInspector(state);
   timelineApi.scrollToPlayhead();

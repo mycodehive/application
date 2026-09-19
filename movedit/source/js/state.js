@@ -176,7 +176,7 @@ export function addAsset(meta, file, url) {
   return asset;
 }
 
-export function addClip(data) {
+export function addClip(data, options = {}) {
   const clip = {
     id: uid("clip"),
     assetId: data.assetId,
@@ -195,8 +195,8 @@ export function addClip(data) {
     opacity: data.opacity ?? 1,
     volume: data.volume ?? 1
   };
-  mutate("clip-add", p => p.clips.push(clip));
-  setSelected("clip", clip.id);
+  mutate("clip-add", p => p.clips.push(clip), { history: options.history !== false });
+  if (options.select !== false) setSelected("clip", clip.id);
   return clip;
 }
 

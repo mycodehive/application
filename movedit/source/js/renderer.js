@@ -60,6 +60,7 @@ export function buildRenderPlan(project, quality = "1080p") {
   const height = quality === "720p" ? (portrait ? 1280 : 720) : (portrait ? 1920 : 1080);
   const mainClips = project.clips.filter(c => c.track === "video1").sort((a,b) => a.timelineStart - b.timelineStart);
   const overlays = project.clips.filter(c => c.track === "overlay" || c.track === "image").sort((a,b) => a.timelineStart - b.timelineStart);
+  const audioClips = project.clips.filter(c => c.track === "audio" && c.type === "audio").sort((a,b) => a.timelineStart - b.timelineStart);
   return {
     width,
     height,
@@ -67,6 +68,7 @@ export function buildRenderPlan(project, quality = "1080p") {
     duration: project.duration,
     mainClips,
     overlays,
+    audioClips,
     subtitles: [...project.subtitles].sort((a,b) => a.startTime - b.startTime),
     transitions: project.transitions
   };
@@ -75,7 +77,8 @@ export function buildRenderPlan(project, quality = "1080p") {
 async function prepareAssets(project, plan, progress) {
   const requiredIds = new Set([
     ...plan.mainClips.map(c => c.assetId),
-    ...plan.overlays.map(c => c.assetId)
+    ...plan.overlays.map(c => c.assetId),
+    ...plan.audioClips.map(c => c.assetId)
   ]);
   const names = new Map();
   let index = 0;
@@ -228,7 +231,31 @@ async function addVisualInputs(project, plan, fileNames, normalizedCount, args, 
     currentVideo = next;
   }
 
-  return { currentVideo, overlayAudioLabels };
+  return { currentVideo, overlayAudioLabels, nextInputIndex: inputIndex };
+}
+
+async function addAudioTrackInputs(plan, fileNames, inputIndex, args, filters, progress) {
+  const labels = [];
+  for (let i = 0; i < plan.audioClips.length; i++) {
+    const clip = plan.audioClips[i];
+    const input = fileNames.get(clip.assetId);
+    if (!input) continue;
+    const hasAudio = await ffmpegService.probeHasAudio(input);
+    if (!hasAudio) continue;
+
+    args.push("-ss",String(clip.sourceIn),"-t",String(clip.duration),"-i",input);
+    const idx = inputIndex++;
+    const label = "aud" + i;
+    const delay = Math.max(0, Math.round(clip.timelineStart * 1000));
+    filters.push(
+      "[" + idx + ":a]atrim=duration=" + clip.duration +
+      ",asetpts=PTS-STARTPTS,aresample=48000,volume=" + (clip.volume ?? 1) +
+      ",adelay=" + delay + "|" + delay + "[" + label + "]"
+    );
+    labels.push(label);
+    progress?.("Audio 준비 " + (i+1) + "/" + plan.audioClips.length);
+  }
+  return { labels, nextInputIndex: inputIndex };
 }
 
 export async function renderProject({ quality = "1080p", onMessage } = {}) {
@@ -247,11 +274,13 @@ export async function renderProject({ quality = "1080p", onMessage } = {}) {
   const main = buildMainGraph(normalized, project);
   const filters = main.graph.split(";").filter(Boolean);
   const visual = await addVisualInputs(project, plan, fileNames, normalized.length, args, filters, "vmain", onMessage);
+  const audioTracks = await addAudioTrackInputs(plan, fileNames, visual.nextInputIndex, args, filters, onMessage);
 
   let audioLabel = "amain";
-  if (visual.overlayAudioLabels.length) {
-    const mixInputs = ["[" + audioLabel + "]", ...visual.overlayAudioLabels.map(label => "[" + label + "]")].join("");
-    filters.push(mixInputs + "amix=inputs=" + (visual.overlayAudioLabels.length + 1) + ":duration=longest:dropout_transition=0[aout]");
+  const extraAudioLabels = [...visual.overlayAudioLabels, ...audioTracks.labels];
+  if (extraAudioLabels.length) {
+    const mixInputs = ["[" + audioLabel + "]", ...extraAudioLabels.map(label => "[" + label + "]")].join("");
+    filters.push(mixInputs + "amix=inputs=" + (extraAudioLabels.length + 1) + ":duration=longest:dropout_transition=0[aout]");
     audioLabel = "aout";
   }
 

@@ -11,6 +11,53 @@ function trackMeta(id) {
 
 export function initTimeline({ timeline, tracks, ruler, playheadEl, scroll, onAssetDrop }) {
   let drag = null;
+  const snapGuide = document.createElement("div");
+  snapGuide.className = "timeline-snap-guide";
+  timeline.appendChild(snapGuide);
+
+  function timelineEdges(project, excludeKind = null, excludeId = null) {
+    const edges = [0];
+    project.clips.forEach(clip => {
+      if (excludeKind === "clip" && clip.id === excludeId) return;
+      edges.push(clip.timelineStart, clip.timelineStart + clip.duration);
+    });
+    project.subtitles.forEach(sub => {
+      if (excludeKind === "subtitle" && sub.id === excludeId) return;
+      edges.push(sub.startTime, sub.endTime);
+    });
+    return edges.filter(Number.isFinite);
+  }
+
+  function nearestSnap(value, project, excludeKind = null, excludeId = null) {
+    const threshold = CONFIG.timelineSnapThresholdPx / (basePps * (getState().zoom / 100));
+    let best = null;
+    for (const target of timelineEdges(project, excludeKind, excludeId)) {
+      const distance = Math.abs(value - target);
+      if (distance <= threshold && (!best || distance < best.distance)) {
+        best = { time: target, distance };
+      }
+    }
+    return best;
+  }
+
+  function snapMove(start, duration, project, kind, id) {
+    const byStart = nearestSnap(start, project, kind, id);
+    const byEnd = nearestSnap(start + duration, project, kind, id);
+    if (!byStart && !byEnd) return { start, snapTime:null };
+    if (byStart && (!byEnd || byStart.distance <= byEnd.distance)) {
+      return { start: Math.max(0, byStart.time), snapTime: byStart.time };
+    }
+    return { start: Math.max(0, byEnd.time - duration), snapTime: byEnd.time };
+  }
+
+  function showSnapGuide(time) {
+    if (!Number.isFinite(time)) {
+      snapGuide.classList.remove("is-visible");
+      return;
+    }
+    snapGuide.style.left = (118 + timeToPixel(time, getState().zoom)) + "px";
+    snapGuide.classList.add("is-visible");
+  }
 
   function drawRuler(project, zoom) {
     ruler.innerHTML = "";
@@ -28,7 +75,7 @@ export function initTimeline({ timeline, tracks, ruler, playheadEl, scroll, onAs
 
   function clipElement(clip, zoom) {
     const el = document.createElement("div");
-    const typeClass = clip.type === "image" ? "image" : clip.track === "overlay" ? "overlay" : "";
+    const typeClass = clip.type === "image" ? "image" : clip.type === "audio" ? "audio" : clip.track === "overlay" ? "overlay" : "";
     el.className = "clip " + typeClass;
     el.dataset.clipId = clip.id;
     el.style.left = timeToPixel(clip.timelineStart, zoom) + "px";
@@ -102,8 +149,12 @@ export function initTimeline({ timeline, tracks, ruler, playheadEl, scroll, onAs
         const assetId = e.dataTransfer.getData("application/x-movedit-asset");
         if (!assetId || !onAssetDrop) return;
         const rect = lane.getBoundingClientRect();
-        const time = pixelToTime(e.clientX - rect.left, zoom);
-        onAssetDrop(assetId, time, track.id);
+        const rawTime = pixelToTime(e.clientX - rect.left, zoom);
+        const snap = nearestSnap(rawTime, project);
+        const time = snap ? snap.time : rawTime;
+        showSnapGuide(snap?.time ?? null);
+        onAssetDrop(assetId, Math.max(0, time), track.id);
+        setTimeout(() => showSnapGuide(null), 180);
       });
 
       if (track.id === "subtitle") {
@@ -124,16 +175,33 @@ export function initTimeline({ timeline, tracks, ruler, playheadEl, scroll, onAs
     if (drag.kind === "clip") {
       const c = drag.initial;
       if (drag.action === "move") {
-        updateClip(drag.id, { timelineStart: Math.max(0, c.timelineStart + deltaTime) }, "clip-move");
+        const proposed = Math.max(0, c.timelineStart + deltaTime);
+        const snapped = snapMove(proposed, c.duration, getState().project, "clip", drag.id);
+        showSnapGuide(snapped.snapTime);
+        updateClip(drag.id, { timelineStart: snapped.start }, "clip-move");
       } else if (drag.action === "trim-left") {
-        const delta = clamp(deltaTime, -c.sourceIn, c.duration - CONFIG.minClipDuration);
+        let delta = clamp(deltaTime, -c.sourceIn, c.duration - CONFIG.minClipDuration);
+        let newStart = Math.max(0, c.timelineStart + delta);
+        const snap = nearestSnap(newStart, getState().project, "clip", drag.id);
+        if (snap) {
+          delta = clamp(snap.time - c.timelineStart, -c.sourceIn, c.duration - CONFIG.minClipDuration);
+          newStart = Math.max(0, c.timelineStart + delta);
+        }
+        showSnapGuide(snap?.time ?? null);
         updateClip(drag.id, {
-          timelineStart: Math.max(0, c.timelineStart + delta),
+          timelineStart: newStart,
           duration: c.duration - delta,
           sourceIn: c.sourceIn + delta
         }, "clip-trim");
       } else {
-        const delta = clamp(deltaTime, -(c.duration - CONFIG.minClipDuration), Math.max(0, c.sourceOut - c.sourceIn - c.duration));
+        let delta = clamp(deltaTime, -(c.duration - CONFIG.minClipDuration), Math.max(0, c.sourceOut - c.sourceIn - c.duration));
+        let newEnd = c.timelineStart + c.duration + delta;
+        const snap = nearestSnap(newEnd, getState().project, "clip", drag.id);
+        if (snap) {
+          delta = clamp(snap.time - (c.timelineStart + c.duration), -(c.duration - CONFIG.minClipDuration), Math.max(0, c.sourceOut - c.sourceIn - c.duration));
+          newEnd = c.timelineStart + c.duration + delta;
+        }
+        showSnapGuide(snap?.time ?? null);
         updateClip(drag.id, {
           duration: c.duration + delta,
           sourceOut: c.sourceOut + delta
@@ -143,18 +211,31 @@ export function initTimeline({ timeline, tracks, ruler, playheadEl, scroll, onAs
       const s = drag.initial;
       if (drag.action === "move") {
         const len = s.endTime - s.startTime;
-        const start = Math.max(0, s.startTime + deltaTime);
-        updateSubtitle(drag.id, { startTime: start, endTime: start + len });
+        const proposed = Math.max(0, s.startTime + deltaTime);
+        const snapped = snapMove(proposed, len, getState().project, "subtitle", drag.id);
+        showSnapGuide(snapped.snapTime);
+        updateSubtitle(drag.id, { startTime: snapped.start, endTime: snapped.start + len });
       } else if (drag.action === "trim-left") {
-        updateSubtitle(drag.id, { startTime: clamp(s.startTime + deltaTime, 0, s.endTime - 0.1) });
+        let start = clamp(s.startTime + deltaTime, 0, s.endTime - 0.1);
+        const snap = nearestSnap(start, getState().project, "subtitle", drag.id);
+        if (snap) start = clamp(snap.time, 0, s.endTime - 0.1);
+        showSnapGuide(snap?.time ?? null);
+        updateSubtitle(drag.id, { startTime: start });
       } else {
-        updateSubtitle(drag.id, { endTime: Math.max(s.startTime + 0.1, s.endTime + deltaTime) });
+        let end = Math.max(s.startTime + 0.1, s.endTime + deltaTime);
+        const snap = nearestSnap(end, getState().project, "subtitle", drag.id);
+        if (snap) end = Math.max(s.startTime + 0.1, snap.time);
+        showSnapGuide(snap?.time ?? null);
+        updateSubtitle(drag.id, { endTime: end });
       }
     }
   }
 
   window.addEventListener("pointermove", moveDrag);
-  window.addEventListener("pointerup", () => { drag = null; });
+  window.addEventListener("pointerup", () => {
+    drag = null;
+    showSnapGuide(null);
+  });
 
   ruler.addEventListener("pointerdown", event => {
     const rect = ruler.getBoundingClientRect();

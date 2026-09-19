@@ -9,6 +9,7 @@ export const CONFIG = {
   pixelsPerSecond: 50,
   historyLimit: 80,
   snapThresholdPx: 14,
+  timelineSnapThresholdPx: 10,
   largeFileBytes: 500 * 1024 * 1024,
   ffmpeg: {
     packageVersion: "0.12.15",

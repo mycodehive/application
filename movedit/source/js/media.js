@@ -21,13 +21,37 @@ function coverRect(asset, project) {
   };
 }
 
+function detectVideoAudio(video) {
+  try {
+    if (video.audioTracks && video.audioTracks.length > 0) return true;
+  } catch {}
+  try {
+    if (typeof video.mozHasAudio === "boolean" && video.mozHasAudio) return true;
+  } catch {}
+  try {
+    if (typeof video.webkitAudioDecodedByteCount === "number" && video.webkitAudioDecodedByteCount > 0) return true;
+  } catch {}
+  try {
+    if (typeof video.captureStream === "function") {
+      const stream = video.captureStream();
+      if (stream?.getAudioTracks?.().length > 0) return true;
+    }
+  } catch {}
+  return null;
+}
+
 function videoMetadata(file, url) {
   return new Promise((resolve, reject) => {
     const video = document.createElement("video");
-    video.preload = "metadata";
+    video.preload = "auto";
     video.muted = true;
+    video.playsInline = true;
     video.src = url;
-    video.onloadedmetadata = () => {
+
+    let settled = false;
+    const finish = () => {
+      if (settled || !video.videoWidth) return;
+      settled = true;
       resolve({
         kind: "video",
         name: file.name,
@@ -35,9 +59,13 @@ function videoMetadata(file, url) {
         size: file.size,
         duration: Number(video.duration) || 0,
         width: video.videoWidth || 1920,
-        height: video.videoHeight || 1080
+        height: video.videoHeight || 1080,
+        hasAudio: detectVideoAudio(video)
       });
     };
+
+    video.onloadeddata = finish;
+    video.onloadedmetadata = () => setTimeout(finish, 250);
     video.onerror = () => reject(new Error("Video Metadata 로드 실패: " + file.name));
   });
 }
@@ -77,6 +105,9 @@ export async function importMediaFiles(files, { toast } = {}) {
       if (meta.width >= 3840 || meta.height >= 2160) {
         toast?.("4K 미디어가 감지되었습니다. 현재 편집기는 1080p 출력을 권장합니다.");
       }
+      if (meta.kind === "video" && meta.hasAudio === true) {
+        toast?.("오디오 스트림이 감지되었습니다. 타임라인 배치 시 VIDEO / AUDIO로 분리됩니다.", "ok");
+      }
     } catch (error) {
       URL.revokeObjectURL(url);
       console.error(error);
@@ -97,7 +128,9 @@ export function addAssetToTimeline(assetId, preferredTime = null) {
     const videoClips = project.clips.filter(c => c.track === "video1");
     const end = videoClips.reduce((max, clip) => Math.max(max, clip.timelineStart + clip.duration), 0);
     const time = preferredTime == null ? end : preferredTime;
-    return addClip({
+    const separated = asset.hasAudio === true;
+
+    const videoClip = addClip({
       assetId: asset.id,
       name: asset.name,
       type: "video",
@@ -107,8 +140,33 @@ export function addAssetToTimeline(assetId, preferredTime = null) {
       sourceIn: 0,
       sourceOut: asset.duration,
       fitMode: "cover",
+      audioSeparated: separated,
+      volume: separated ? 0 : 1,
       ...fitted
     });
+
+    if (separated) {
+      addClip({
+        assetId: asset.id,
+        name: asset.name + " · Audio",
+        type: "audio",
+        track: "audio",
+        timelineStart: time,
+        duration: asset.duration,
+        sourceIn: 0,
+        sourceOut: asset.duration,
+        fitMode: "manual",
+        x: 0,
+        y: 0,
+        width: project.resolution.width,
+        height: 1,
+        opacity: 1,
+        volume: 1,
+        sourceVideoClipId: videoClip.id
+      }, { history: false, select: false });
+    }
+
+    return videoClip;
   }
 
   return addClip({

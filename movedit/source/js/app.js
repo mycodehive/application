@@ -105,8 +105,9 @@ async function renderMediaList(state) {
       : '<div class="media-thumb placeholder">' + (asset.kind === "video" ? "▶" : "▧") + '</div>';
     const status = getRuntimeFile(asset.id) ? "" : " · 재연결 필요";
     const duration = asset.kind === "video" ? (asset.duration || 0).toFixed(1) + "s · " : "";
+    const audioInfo = asset.kind === "video" && asset.hasAudio === true ? " · AUDIO 분리" : "";
     item.innerHTML = visual + '<div><div class="media-name" title="' + escapeHtml(asset.name) + '">' + escapeHtml(asset.name) + '</div>' +
-      '<div class="media-meta">' + asset.kind.toUpperCase() + ' · ' + duration + asset.width + "×" + asset.height + status + '</div></div>';
+      '<div class="media-meta">' + asset.kind.toUpperCase() + ' · ' + duration + asset.width + "×" + asset.height + audioInfo + status + '</div></div>';
     item.addEventListener("dblclick", () => {
       if (!getRuntimeFile(asset.id)) return toast("원본 파일을 다시 가져와 재연결해주세요.", "error");
       addAssetToTimeline(asset.id);

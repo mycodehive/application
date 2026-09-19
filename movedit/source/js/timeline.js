@@ -128,6 +128,8 @@ export function initTimeline({ timeline, tracks, ruler, playheadEl, scroll, onAs
 
   function render(state) {
     const { project, zoom, playhead } = state;
+    const savedScrollTop = scroll.scrollTop;
+    const savedScrollLeft = scroll.scrollLeft;
     drawRuler(project, zoom);
     tracks.innerHTML = "";
     const duration = Math.max(project.duration + 8, 30);
@@ -167,6 +169,11 @@ export function initTimeline({ timeline, tracks, ruler, playheadEl, scroll, onAs
     });
 
     playheadEl.style.left = (118 + timeToPixel(playhead, zoom)) + "px";
+
+    // 선택 변경(AUDIO 포함)으로 트랙 DOM이 재생성되어도 사용자가 보고 있던
+    // 세로/가로 스크롤 위치를 유지한다.
+    scroll.scrollTop = savedScrollTop;
+    scroll.scrollLeft = savedScrollLeft;
   }
 
   function moveDrag(event) {

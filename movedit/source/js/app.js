@@ -11,6 +11,8 @@ const els = {
   projectName:$("projectName"), aspectRatio:$("aspectRatioSelect"), undo:$("undoBtn"), redo:$("redoBtn"), saveProject:$("saveProjectBtn"),
   projectFile:$("projectFileInput"), render:$("renderBtn"), mediaInput:$("mediaInput"), dropZone:$("dropZone"),
   mediaList:$("mediaList"), engineStatus:$("engineStatus"), engineHint:$("engineHint"),
+  workspace:document.querySelector(".workspace"),
+  leftPanelResizer:$("leftPanelResizer"), rightPanelResizer:$("rightPanelResizer"), timelinePanelResizer:$("timelinePanelResizer"),
   canvas:$("previewCanvas"), previewStage:$("previewStage"), previewEmpty:$("previewEmpty"),
   scrub:$("previewScrub"), current:$("currentTime"), total:$("totalTime"), play:$("playBtn"),
   prev:$("prevBtn"), next:$("nextBtn"), split:$("splitBtn"), masterVolume:$("masterVolume"),
@@ -148,9 +150,89 @@ const timelineApi = initTimeline({
 });
 
 const previewApi = initPreview({
-  canvas:els.canvas, empty:els.previewEmpty, scrub:els.scrub,
+  canvas:els.canvas, stage:els.previewStage, empty:els.previewEmpty, scrub:els.scrub,
   currentEl:els.current, totalEl:els.total, playBtn:els.play, masterVolume:els.masterVolume
 });
+
+function initWorkspaceResizers() {
+  const workspace = els.workspace;
+  if (!workspace) return;
+
+  const saved = {
+    left: Number(localStorage.getItem("movedit:leftPanel")),
+    right: Number(localStorage.getItem("movedit:rightPanel")),
+    timeline: Number(localStorage.getItem("movedit:timelinePanel"))
+  };
+  if (saved.left > 0) workspace.style.setProperty("--left-panel", saved.left + "px");
+  if (saved.right > 0) workspace.style.setProperty("--right-panel", saved.right + "px");
+  if (saved.timeline > 0) workspace.style.setProperty("--timeline-panel", saved.timeline + "px");
+
+  const startResize = (kind, event) => {
+    event.preventDefault();
+    const handle = event.currentTarget;
+    const rect = workspace.getBoundingClientRect();
+    const styles = getComputedStyle(workspace);
+    const start = {
+      x:event.clientX,
+      y:event.clientY,
+      left:parseFloat(styles.getPropertyValue("--left-panel")) || 250,
+      right:parseFloat(styles.getPropertyValue("--right-panel")) || 270,
+      timeline:parseFloat(styles.getPropertyValue("--timeline-panel")) || 290
+    };
+    handle.classList.add("is-dragging");
+    document.body.classList.add("workspace-resizing");
+    handle.setPointerCapture?.(event.pointerId);
+
+    const move = e => {
+      const width = rect.width;
+      const height = rect.height;
+      if (kind === "left") {
+        const maxLeft = Math.max(180, width - start.right - 360);
+        const value = Math.min(maxLeft, Math.max(170, start.left + (e.clientX - start.x)));
+        workspace.style.setProperty("--left-panel", value + "px");
+      } else if (kind === "right") {
+        const maxRight = Math.max(210, width - start.left - 360);
+        const value = Math.min(maxRight, Math.max(210, start.right - (e.clientX - start.x)));
+        workspace.style.setProperty("--right-panel", value + "px");
+      } else {
+        const maxTimeline = Math.max(190, height - 220);
+        const value = Math.min(maxTimeline, Math.max(170, start.timeline - (e.clientY - start.y)));
+        workspace.style.setProperty("--timeline-panel", value + "px");
+      }
+    };
+
+    const end = () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", end);
+      handle.classList.remove("is-dragging");
+      document.body.classList.remove("workspace-resizing");
+      const current = getComputedStyle(workspace);
+      localStorage.setItem("movedit:leftPanel", parseFloat(current.getPropertyValue("--left-panel")) || 250);
+      localStorage.setItem("movedit:rightPanel", parseFloat(current.getPropertyValue("--right-panel")) || 270);
+      localStorage.setItem("movedit:timelinePanel", parseFloat(current.getPropertyValue("--timeline-panel")) || 290);
+    };
+
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", end, { once:true });
+  };
+
+  els.leftPanelResizer?.addEventListener("pointerdown", e => startResize("left", e));
+  els.rightPanelResizer?.addEventListener("pointerdown", e => startResize("right", e));
+  els.timelinePanelResizer?.addEventListener("pointerdown", e => startResize("timeline", e));
+
+  const reset = () => {
+    workspace.style.setProperty("--left-panel","250px");
+    workspace.style.setProperty("--right-panel","270px");
+    workspace.style.setProperty("--timeline-panel","290px");
+    localStorage.removeItem("movedit:leftPanel");
+    localStorage.removeItem("movedit:rightPanel");
+    localStorage.removeItem("movedit:timelinePanel");
+  };
+  [els.leftPanelResizer,els.rightPanelResizer,els.timelinePanelResizer]
+    .forEach(handle => handle?.addEventListener("dblclick", reset));
+}
+
+initWorkspaceResizers();
 
 els.prev.addEventListener("click", () => setPlayhead(getState().playhead - 1));
 els.next.addEventListener("click", () => setPlayhead(getState().playhead + 1));
@@ -284,7 +366,9 @@ subscribe(state => {
   quality.options[1].textContent = "720p · " + (portrait ? "720×1280" : "1280×720");
   renderMediaList(state);
   renderInspector(state);
-  timelineApi.scrollToPlayhead();
+  if (["playhead","playing","zoom"].includes(state.reason)) {
+    timelineApi.scrollToPlayhead();
+  }
 });
 
 ffmpegService.onStatus((status, detail) => {

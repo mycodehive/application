@@ -15,13 +15,38 @@ function activeAt(item, time, startKey = "timelineStart", durationKey = "duratio
   return time >= start && time < start + item[durationKey];
 }
 
-export function initPreview({ canvas, empty, scrub, currentEl, totalEl, playBtn, masterVolume }) {
+export function initPreview({ canvas, stage, empty, scrub, currentEl, totalEl, playBtn, masterVolume }) {
   const ctx = canvas.getContext("2d");
   const mediaPool = new Map();
   let raf = 0;
   let lastFrame = performance.now();
   let overlayDrag = null;
   let snapGuides = { left:false, right:false, top:false, bottom:false };
+  let lastProjectRatio = 16 / 9;
+
+  function fitCanvasToStage(project = getState().project) {
+    if (!stage) return;
+    const stageRect = stage.getBoundingClientRect();
+    const style = getComputedStyle(stage);
+    const padX = parseFloat(style.paddingLeft || 0) + parseFloat(style.paddingRight || 0);
+    const padY = parseFloat(style.paddingTop || 0) + parseFloat(style.paddingBottom || 0);
+    const availableWidth = Math.max(40, stageRect.width - padX);
+    const availableHeight = Math.max(40, stageRect.height - padY);
+    const projectWidth = Math.max(1, Number(project?.resolution?.width) || 1920);
+    const projectHeight = Math.max(1, Number(project?.resolution?.height) || 1080);
+    const ratio = projectWidth / projectHeight;
+    lastProjectRatio = ratio;
+
+    let displayWidth = availableWidth;
+    let displayHeight = displayWidth / ratio;
+    if (displayHeight > availableHeight) {
+      displayHeight = availableHeight;
+      displayWidth = displayHeight * ratio;
+    }
+
+    canvas.style.width = Math.max(1, Math.floor(displayWidth)) + "px";
+    canvas.style.height = Math.max(1, Math.floor(displayHeight)) + "px";
+  }
 
   function snapThreshold(project) {
     const rect = canvas.getBoundingClientRect();
@@ -188,6 +213,7 @@ export function initPreview({ canvas, empty, scrub, currentEl, totalEl, playBtn,
     const landscape = projectWidth >= projectHeight;
     canvas.width = landscape ? 960 : Math.round(960 * projectWidth / projectHeight);
     canvas.height = landscape ? Math.round(960 * projectHeight / projectWidth) : 960;
+    fitCanvasToStage(project);
     ctx.fillStyle = "#000"; ctx.fillRect(0,0,canvas.width,canvas.height);
 
     syncVideoPlayback(state);
@@ -328,6 +354,15 @@ export function initPreview({ canvas, empty, scrub, currentEl, totalEl, playBtn,
     snapGuides = { left:false, right:false, top:false, bottom:false };
     renderFrame(getState());
   });
+
+  const resizeObserver = typeof ResizeObserver !== "undefined"
+    ? new ResizeObserver(() => {
+        fitCanvasToStage(getState().project);
+        renderFrame(getState());
+      })
+    : null;
+  if (stage && resizeObserver) resizeObserver.observe(stage);
+  window.addEventListener("resize", () => fitCanvasToStage(getState().project));
 
   subscribe(state => {
     playBtn.textContent = state.playing ? "❚❚" : "▶";

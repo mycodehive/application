@@ -21,7 +21,7 @@ const els = {
   selectionLabel:$("selectionLabel"), inspectorEmpty:$("inspectorEmpty"), clipInspector:$("clipInspector"), subtitleInspector:$("subtitleInspector"),
   clipStart:$("clipStart"), clipDuration:$("clipDuration"), clipSourceIn:$("clipSourceIn"), clipSourceOut:$("clipSourceOut"),
   clipX:$("clipX"), clipY:$("clipY"), clipWidth:$("clipWidth"), clipHeight:$("clipHeight"), clipOpacity:$("clipOpacity"), clipVolume:$("clipVolume"),
-  transitionType:$("transitionType"), transitionDuration:$("transitionDuration"), deleteClip:$("deleteClipBtn"),
+  transitionType:$("transitionType"), transitionDuration:$("transitionDuration"), transitionSection:document.querySelector(".inspector-section"), deleteClip:$("deleteClipBtn"),
   subtitleText:$("subtitleText"), subtitleStart:$("subtitleStart"), subtitleEnd:$("subtitleEnd"), subtitleFontSize:$("subtitleFontSize"),
   subtitlePosition:$("subtitlePosition"), subtitleColor:$("subtitleColor"), subtitleBgColor:$("subtitleBgColor"), subtitleBgOpacity:$("subtitleBgOpacity"),
   deleteSubtitle:$("deleteSubtitleBtn"), toastRoot:$("toastRoot"),
@@ -293,14 +293,22 @@ function bindNumber(el, getter, patchKey, subtitle = false) {
   [els.clipOpacity,"opacity"],[els.clipVolume,"volume"]
 ].forEach(([el,key]) => bindNumber(el,null,key,false));
 
-els.transitionType.addEventListener("change", () => {
+function applySelectedTransition() {
   const selected = getState().selected;
-  if (selected?.kind === "clip") setTransition(selected.id, els.transitionType.value, Number(els.transitionDuration.value));
-});
-els.transitionDuration.addEventListener("change", () => {
-  const selected = getState().selected;
-  if (selected?.kind === "clip") setTransition(selected.id, els.transitionType.value, Number(els.transitionDuration.value));
-});
+  if (selected?.kind !== "clip") return;
+  const result = setTransition(selected.id, els.transitionType.value, Number(els.transitionDuration.value));
+  if (!result?.ok) {
+    toast(result?.reason || "전환 효과를 적용할 수 없습니다.", "error");
+    renderInspector(getState());
+    return;
+  }
+  if (els.transitionType.value !== "none") {
+    toast(els.transitionType.options[els.transitionType.selectedIndex].text + " 전환을 적용했습니다.", "ok");
+  }
+}
+
+els.transitionType.addEventListener("change", applySelectedTransition);
+els.transitionDuration.addEventListener("change", applySelectedTransition);
 
 els.subtitleText.addEventListener("input", () => {
   const selected = getState().selected;
@@ -338,10 +346,17 @@ function renderInspector(state) {
     els.clipX.value = Math.round(clip.x); els.clipY.value = Math.round(clip.y);
     els.clipWidth.value = Math.round(clip.width); els.clipHeight.value = Math.round(clip.height);
     els.clipOpacity.value = clip.opacity ?? 1; els.clipVolume.value = clip.volume ?? 1;
-    const tr = project.transitions.find(t => t.fromClipId === clip.id);
+
+    const transitionClipId = clip.type === "audio" && clip.sourceVideoClipId ? clip.sourceVideoClipId : clip.id;
+    const transitionSource = project.clips.find(c => c.id === transitionClipId);
+    const canTransition = transitionSource?.track === "video1";
+    if (els.transitionSection) els.transitionSection.classList.toggle("hidden", !canTransition);
+
+    const tr = project.transitions.find(t => t.fromClipId === transitionClipId);
     els.transitionType.value = tr?.type || "none";
     els.transitionDuration.value = tr?.duration || 0.5;
   } else {
+    if (els.transitionSection) els.transitionSection.classList.add("hidden");
     const sub = project.subtitles.find(s => s.id === selected.id);
     if (!sub) return;
     els.selectionLabel.textContent = "Subtitle";

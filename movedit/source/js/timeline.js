@@ -81,7 +81,14 @@ export function initTimeline({ timeline, tracks, ruler, playheadEl, scroll, onAs
     el.style.left = timeToPixel(clip.timelineStart, zoom) + "px";
     el.style.width = Math.max(12, timeToPixel(clip.duration, zoom)) + "px";
     el.innerHTML = '<span class="handle left"></span><div class="clip-body"></div><span class="handle right"></span>';
+    const transition = getState().project.transitions.find(t => t.fromClipId === clip.id);
     el.querySelector(".clip-body").textContent = clip.name || clip.type;
+    if (transition) {
+      const badge = document.createElement("span");
+      badge.className = "transition-badge";
+      badge.textContent = transition.type + " " + transition.duration.toFixed(1) + "s";
+      el.appendChild(badge);
+    }
     if (getState().selected?.kind === "clip" && getState().selected.id === clip.id) el.classList.add("selected");
 
     el.addEventListener("pointerdown", event => {

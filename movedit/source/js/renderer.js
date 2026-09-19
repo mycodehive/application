@@ -8,7 +8,7 @@ const safeName = (name, fallback = "media") => {
 
 function xfadeName(type) {
   const map = {
-    fade: "fade",
+    fade: "fadeblack",
     crossfade: "fade",
     slideleft: "slideleft",
     slideright: "slideright",
@@ -149,16 +149,24 @@ function buildMainGraph(normalized, project) {
     const prevClip = normalized[i-1].clip;
     const clip = normalized[i].clip;
     const transition = project.transitions.find(t => t.fromClipId === prevClip.id && t.toClipId === clip.id);
-    const td = transition ? Math.min(transition.duration, prevClip.duration - 0.02, clip.duration - 0.02) : 0.02;
-    const type = transition ? xfadeName(transition.type) : "fade";
-    const offset = Math.max(0, duration - td);
     const vOut = "vx" + i;
     const aOut = "ax" + i;
-    graph += "[" + video + "][" + i + ":v]xfade=transition=" + type + ":duration=" + td + ":offset=" + offset + "[" + vOut + "];";
-    graph += "[" + audio + "][" + i + ":a]acrossfade=d=" + td + ":c1=tri:c2=tri[" + aOut + "];";
+
+    if (transition) {
+      const td = Math.max(0.1, Math.min(transition.duration, prevClip.duration - 0.02, clip.duration - 0.02));
+      const type = xfadeName(transition.type);
+      const offset = Math.max(0, duration - td);
+      graph += "[" + video + "][" + i + ":v]xfade=transition=" + type + ":duration=" + td + ":offset=" + offset + "[" + vOut + "];";
+      graph += "[" + audio + "][" + i + ":a]acrossfade=d=" + td + ":c1=tri:c2=tri[" + aOut + "];";
+      duration += clip.duration - td;
+    } else {
+      graph += "[" + video + "][" + i + ":v]concat=n=2:v=1:a=0[" + vOut + "];";
+      graph += "[" + audio + "][" + i + ":a]concat=n=2:v=0:a=1[" + aOut + "];";
+      duration += clip.duration;
+    }
+
     video = vOut;
     audio = aOut;
-    duration += clip.duration - td;
   }
 
   graph += "[" + video + "]setpts=PTS-STARTPTS[vmain];[" + audio + "]asetpts=PTS-STARTPTS[amain]";

@@ -168,7 +168,7 @@ export function initPreview({ canvas, stage, empty, scrub, currentEl, totalEl, p
     });
   }
 
-  function drawClip(clip, media, project, time, alpha = 1) {
+  function drawClip(clip, media, project, time, alpha = 1, transform = null) {
     if (!media) return;
     const state = getState();
     const sourceTime = clip.sourceIn + (time - clip.timelineStart);
@@ -193,6 +193,11 @@ export function initPreview({ canvas, stage, empty, scrub, currentEl, totalEl, p
         x = 0;
         y = (canvas.height - h) / 2;
       }
+    }
+
+    if (transform) {
+      x += transform.x || 0;
+      y += transform.y || 0;
     }
 
     ctx.globalAlpha = (clip.opacity ?? 1) * alpha;
@@ -222,14 +227,51 @@ export function initPreview({ canvas, stage, empty, scrub, currentEl, totalEl, p
       .filter(c => c.track === "video1" && activeAt(c, playhead))
       .sort((a,b) => a.timelineStart - b.timelineStart);
 
-    if (activeMain.length === 2) {
+    if (activeMain.length >= 2) {
       const first = activeMain[0];
       const second = activeMain[1];
       const tr = project.transitions.find(t => t.fromClipId === first.id && t.toClipId === second.id);
       if (tr) {
         const progress = clamp((playhead - second.timelineStart) / Math.max(0.01, tr.duration), 0, 1);
-        drawClip(first, getMedia(first), project, playhead, 1 - progress);
-        drawClip(second, getMedia(second), project, playhead, progress);
+        const firstMedia = getMedia(first);
+        const secondMedia = getMedia(second);
+
+        if (tr.type === "fade") {
+          // Fade through black: first clip fades out, then the second clip fades in.
+          if (progress < 0.5) {
+            drawClip(first, firstMedia, project, playhead, 1 - progress * 2);
+          } else {
+            drawClip(second, secondMedia, project, playhead, (progress - 0.5) * 2);
+          }
+        } else if (tr.type === "slideleft") {
+          drawClip(first, firstMedia, project, playhead, 1, { x: -progress * canvas.width });
+          drawClip(second, secondMedia, project, playhead, 1, { x: (1 - progress) * canvas.width });
+        } else if (tr.type === "slideright") {
+          drawClip(first, firstMedia, project, playhead, 1, { x: progress * canvas.width });
+          drawClip(second, secondMedia, project, playhead, 1, { x: -(1 - progress) * canvas.width });
+        } else if (tr.type === "wipeleft") {
+          drawClip(first, firstMedia, project, playhead);
+          ctx.save();
+          const reveal = canvas.width * progress;
+          ctx.beginPath();
+          ctx.rect(canvas.width - reveal, 0, reveal, canvas.height);
+          ctx.clip();
+          drawClip(second, secondMedia, project, playhead);
+          ctx.restore();
+        } else if (tr.type === "wiperight") {
+          drawClip(first, firstMedia, project, playhead);
+          ctx.save();
+          const reveal = canvas.width * progress;
+          ctx.beginPath();
+          ctx.rect(0, 0, reveal, canvas.height);
+          ctx.clip();
+          drawClip(second, secondMedia, project, playhead);
+          ctx.restore();
+        } else {
+          // Cross Fade
+          drawClip(first, firstMedia, project, playhead, 1 - progress);
+          drawClip(second, secondMedia, project, playhead, progress);
+        }
       } else {
         activeMain.forEach(clip => drawClip(clip, getMedia(clip), project, playhead));
       }

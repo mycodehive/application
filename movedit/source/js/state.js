@@ -200,6 +200,18 @@ export function addClip(data, options = {}) {
   return clip;
 }
 
+function syncLinkedAudioForClip(p, clip) {
+  if (!clip || clip.type === "audio") return;
+  p.clips
+    .filter(item => item.type === "audio" && item.sourceVideoClipId === clip.id)
+    .forEach(audio => {
+      audio.timelineStart = clip.timelineStart;
+      audio.duration = clip.duration;
+      audio.sourceIn = clip.sourceIn;
+      audio.sourceOut = clip.sourceOut;
+    });
+}
+
 export function updateClip(id, patch, label = "clip-update") {
   mutate(label, p => {
     const clip = p.clips.find(item => item.id === id);
@@ -209,6 +221,7 @@ export function updateClip(id, patch, label = "clip-update") {
     clip.timelineStart = Math.max(0, Number(clip.timelineStart) || 0);
     clip.sourceIn = Math.max(0, Number(clip.sourceIn) || 0);
     clip.sourceOut = Math.max(clip.sourceIn + CONFIG.minClipDuration, Number(clip.sourceOut) || clip.sourceIn + clip.duration);
+    syncLinkedAudioForClip(p, clip);
   });
 }
 
@@ -216,7 +229,11 @@ export function removeSelected() {
   if (!selected) return;
   if (selected.kind === "clip") {
     mutate("clip-delete", p => {
-      p.clips = p.clips.filter(c => c.id !== selected.id);
+      const clip = p.clips.find(c => c.id === selected.id);
+      const linkedAudioIds = clip?.type === "audio"
+        ? []
+        : p.clips.filter(c => c.type === "audio" && c.sourceVideoClipId === selected.id).map(c => c.id);
+      p.clips = p.clips.filter(c => c.id !== selected.id && !linkedAudioIds.includes(c.id));
       p.transitions = p.transitions.filter(t => t.fromClipId !== selected.id && t.toClipId !== selected.id);
     });
   } else if (selected.kind === "subtitle") {
@@ -245,6 +262,24 @@ export function splitSelectedClip() {
   };
   clip.duration = leftDuration;
   clip.sourceOut = clip.sourceIn + leftDuration;
+
+  const linkedAudio = project.clips.find(c => c.type === "audio" && c.sourceVideoClipId === clip.id);
+  if (linkedAudio) {
+    linkedAudio.duration = leftDuration;
+    linkedAudio.sourceOut = linkedAudio.sourceIn + leftDuration;
+    const rightAudio = {
+      ...cloneProject(linkedAudio),
+      id: uid("clip"),
+      name: linkedAudio.name.replace(/ · Audio$/, "") + " · Audio",
+      sourceVideoClipId: right.id,
+      timelineStart: playhead,
+      duration: rightDuration,
+      sourceIn: linkedAudio.sourceIn + local,
+      sourceOut: linkedAudio.sourceOut
+    };
+    project.clips.push(rightAudio);
+  }
+
   project.clips.push(right);
   recalcDuration();
   selected = { kind: "clip", id: right.id };
@@ -288,28 +323,44 @@ function reflowMainTrack(p) {
     const tr = p.transitions.find(t => t.fromClipId === prev.id && t.toClipId === current.id);
     const overlap = tr ? Math.min(tr.duration, prev.duration - 0.05, current.duration - 0.05) : 0;
     current.timelineStart = Math.max(0, prev.timelineStart + prev.duration - overlap);
+    syncLinkedAudioForClip(p, current);
   }
+  syncLinkedAudioForClip(p, clips[0]);
 }
 
 export function setTransition(fromClipId, type, duration) {
+  const source = project.clips.find(c => c.id === fromClipId);
+  const resolvedId = source?.type === "audio" && source.sourceVideoClipId ? source.sourceVideoClipId : fromClipId;
+  const ordered = project.clips.filter(c => c.track === "video1").sort((a,b) => a.timelineStart - b.timelineStart);
+  const index = ordered.findIndex(c => c.id === resolvedId);
+  const from = ordered[index];
+  const next = ordered[index + 1];
+
+  if (!from) return { ok:false, reason:"VIDEO 1 클립을 선택해야 합니다." };
+  if (type !== "none" && !next) return { ok:false, reason:"전환 효과를 적용하려면 뒤에 VIDEO 1 클립이 있어야 합니다." };
+
   mutate("transition-update", p => {
-    p.transitions = p.transitions.filter(t => t.fromClipId !== fromClipId);
+    p.transitions = p.transitions.filter(t => t.fromClipId !== resolvedId);
     const clips = p.clips.filter(c => c.track === "video1").sort((a,b) => a.timelineStart - b.timelineStart);
-    const index = clips.findIndex(c => c.id === fromClipId);
-    const next = clips[index + 1];
-    const from = clips[index];
-    if (type !== "none" && from && next) {
-      const safeDuration = Math.min(Number(duration) || 0.5, from.duration - 0.05, next.duration - 0.05, 2);
+    const currentIndex = clips.findIndex(c => c.id === resolvedId);
+    const currentFrom = clips[currentIndex];
+    const currentNext = clips[currentIndex + 1];
+
+    if (type !== "none" && currentFrom && currentNext) {
+      const requested = Math.max(0.1, Number(duration) || 0.5);
+      const safeDuration = Math.max(0.1, Math.min(requested, currentFrom.duration - 0.05, currentNext.duration - 0.05, 2));
       p.transitions.push({
         id: uid("transition"),
-        fromClipId,
-        toClipId: next.id,
+        fromClipId: currentFrom.id,
+        toClipId: currentNext.id,
         type,
-        duration: Math.max(0.1, safeDuration)
+        duration: safeDuration
       });
     }
     reflowMainTrack(p);
   });
+
+  return { ok:true, fromClipId:resolvedId, toClipId:next?.id || null };
 }
 
 export function undo() {

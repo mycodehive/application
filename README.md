@@ -15,6 +15,7 @@
 | --- | --- | --- |
 | **GPX Studio** | [gpx-edit](https://github.writeaday.click/application/gpx-edit/) | GPX 구간 자르기, 경로 삭제, 트랙 분할, 웨이포인트 편집 및 GPX 1.1 저장 |
 | **MovEdit** | [movedit](https://github.writeaday.click/application/movedit/) | 브라우저 기반 영상 편집, 자막, Overlay, Transition, Audio 분리 및 MP4 렌더링 |
+| **Magic QR Tree** | [magic-qr-tree](https://github.writeaday.click/application/magic-qr-tree/) | URL을 QR로 변환하고 3D 나무·지형으로 시각화하는 인터랙티브 WebGL 앱 |
 | **세종대 점심픽** | [sejonglaunch](https://github.writeaday.click/application/sejonglaunch/) | 거리·가격·분류 조건을 기반으로 점심 식당을 추천하는 도구 |
 | **GPX Navi** | [gpxnavi](https://github.writeaday.click/application/gpxnavi/) | GPX 경로, 현재 위치, 남은 거리, 경로 이탈 여부를 확인하는 내비게이션 |
 | **자전거 트래커** | [bike](https://github.writeaday.click/application/bike/) | 주행 시간, 현재 속도, 최고 속도, 고도와 위치를 확인하는 라이딩 도구 |
@@ -93,6 +94,28 @@ movedit/
 
 ---
 
+### Magic QR Tree
+
+입력한 URL을 QR 코드로 생성하고, QR 패턴을 3D 지형과 나무 형태로 표현하는 인터랙티브 WebGL 애플리케이션입니다.
+
+주요 기능:
+
+- URL 기반 QR 코드 생성
+- QR 패턴을 이용한 3D 지형 생성
+- 3D 나무와 장식 요소 렌더링
+- Spring / Summer / Autumn 계절 테마
+- 마우스 Drag 회전 및 Scroll Zoom
+- QR 스캔 전용 Top View
+- 현재 URL과 계절 상태를 Query String으로 공유
+- 공유 링크 클립보드 복사
+- Three.js / WebGL 기반 브라우저 렌더링
+
+실행:
+
+https://github.writeaday.click/application/magic-qr-tree/
+
+---
+
 ## 저장소 구조
 
 ```text
@@ -107,6 +130,7 @@ application/
 ├── gpx-edit/
 ├── gpxnavi/
 ├── lotto/
+├── magic-qr-tree/
 ├── mindmap/
 ├── movedit/
 ├── myactivity/

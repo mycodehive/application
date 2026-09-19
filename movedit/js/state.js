@@ -213,23 +213,36 @@ export function updateSubtitle(id, patch) {
   });
 }
 
+function reflowMainTrack(p) {
+  const clips = p.clips.filter(c => c.track === "video1").sort((a,b) => a.timelineStart - b.timelineStart);
+  if (!clips.length) return;
+  for (let i = 1; i < clips.length; i++) {
+    const prev = clips[i - 1];
+    const current = clips[i];
+    const tr = p.transitions.find(t => t.fromClipId === prev.id && t.toClipId === current.id);
+    const overlap = tr ? Math.min(tr.duration, prev.duration - 0.05, current.duration - 0.05) : 0;
+    current.timelineStart = Math.max(0, prev.timelineStart + prev.duration - overlap);
+  }
+}
+
 export function setTransition(fromClipId, type, duration) {
   mutate("transition-update", p => {
     p.transitions = p.transitions.filter(t => t.fromClipId !== fromClipId);
-    if (type === "none") return;
     const clips = p.clips.filter(c => c.track === "video1").sort((a,b) => a.timelineStart - b.timelineStart);
     const index = clips.findIndex(c => c.id === fromClipId);
     const next = clips[index + 1];
     const from = clips[index];
-    if (!from || !next) return;
-    const safeDuration = Math.min(Number(duration) || 0.5, from.duration - 0.05, next.duration - 0.05, 2);
-    p.transitions.push({
-      id: uid("transition"),
-      fromClipId,
-      toClipId: next.id,
-      type,
-      duration: Math.max(0.1, safeDuration)
-    });
+    if (type !== "none" && from && next) {
+      const safeDuration = Math.min(Number(duration) || 0.5, from.duration - 0.05, next.duration - 0.05, 2);
+      p.transitions.push({
+        id: uid("transition"),
+        fromClipId,
+        toClipId: next.id,
+        type,
+        duration: Math.max(0.1, safeDuration)
+      });
+    }
+    reflowMainTrack(p);
   });
 }
 

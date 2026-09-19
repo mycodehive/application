@@ -87,7 +87,7 @@ export function initPreview({ canvas, empty, scrub, currentEl, totalEl, playBtn,
     });
   }
 
-  function drawClip(clip, media, project, time) {
+  function drawClip(clip, media, project, time, alpha = 1) {
     if (!media) return;
     const state = getState();
     const sourceTime = clip.sourceIn + (time - clip.timelineStart);
@@ -97,7 +97,7 @@ export function initPreview({ canvas, empty, scrub, currentEl, totalEl, playBtn,
     const sx = canvas.width / project.resolution.width;
     const sy = canvas.height / project.resolution.height;
     const x = clip.x * sx, y = clip.y * sy, w = clip.width * sx, h = clip.height * sy;
-    ctx.globalAlpha = clip.opacity ?? 1;
+    ctx.globalAlpha = (clip.opacity ?? 1) * alpha;
     try { ctx.drawImage(media, x, y, w, h); } catch {}
     ctx.globalAlpha = 1;
 
@@ -116,10 +116,24 @@ export function initPreview({ canvas, empty, scrub, currentEl, totalEl, playBtn,
 
     syncVideoPlayback(state);
 
-    project.clips
+    const activeMain = project.clips
       .filter(c => c.track === "video1" && activeAt(c, playhead))
-      .sort((a,b) => a.timelineStart - b.timelineStart)
-      .forEach(clip => drawClip(clip, getMedia(clip), project, playhead));
+      .sort((a,b) => a.timelineStart - b.timelineStart);
+
+    if (activeMain.length === 2) {
+      const first = activeMain[0];
+      const second = activeMain[1];
+      const tr = project.transitions.find(t => t.fromClipId === first.id && t.toClipId === second.id);
+      if (tr) {
+        const progress = clamp((playhead - second.timelineStart) / Math.max(0.01, tr.duration), 0, 1);
+        drawClip(first, getMedia(first), project, playhead, 1 - progress);
+        drawClip(second, getMedia(second), project, playhead, progress);
+      } else {
+        activeMain.forEach(clip => drawClip(clip, getMedia(clip), project, playhead));
+      }
+    } else {
+      activeMain.forEach(clip => drawClip(clip, getMedia(clip), project, playhead));
+    }
 
     project.clips
       .filter(c => c.track !== "video1" && c.track !== "audio" && activeAt(c, playhead))

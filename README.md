@@ -15,6 +15,7 @@
 | --- | --- | --- |
 | **GPX Studio** | [gpx-edit](https://github.writeaday.click/application/gpx-edit/) | GPX 구간 자르기, 경로 삭제, 트랙 분할, 웨이포인트 편집 및 GPX 1.1 저장 |
 | **MovEdit** | [movedit](https://github.writeaday.click/application/movedit/) | 브라우저 기반 영상 편집, 자막, Overlay, Transition, Audio 분리 및 MP4 렌더링 |
+| **HTML Edit** | [htmledit](https://github.writeaday.click/application/htmledit/) | HTML 파일을 화면에서 직접 클릭하며 텍스트·속성·스타일·요소를 편집하는 비주얼 HTML 편집기 |
 | **Magic QR Tree** | [magic-qr-tree](https://github.writeaday.click/application/magic-qr-tree/) | URL을 QR로 변환하고 3D 나무·지형으로 시각화하는 인터랙티브 WebGL 앱 |
 | **세종대 점심픽** | [sejonglaunch](https://github.writeaday.click/application/sejonglaunch/) | 거리·가격·분류 조건을 기반으로 점심 식당을 추천하는 도구 |
 | **GPX Navi** | [gpxnavi](https://github.writeaday.click/application/gpxnavi/) | GPX 경로, 현재 위치, 남은 거리, 경로 이탈 여부를 확인하는 내비게이션 |
@@ -94,6 +95,31 @@ movedit/
 
 ---
 
+### HTML Edit
+
+HTML 파일을 브라우저에서 불러와 소스코드를 직접 수정하지 않고 화면 요소를 선택하면서 수정하는 비주얼 HTML 편집기입니다.
+
+주요 기능:
+
+- 로컬 HTML 파일 열기
+- 화면 요소 클릭 선택
+- 텍스트 더블클릭 직접 편집
+- Section / Container / Heading / Paragraph / Link / Button / Image / List / Divider / Card 추가
+- ID / Class / href / src / alt 수정
+- 크기·간격·글자·색상·테두리 스타일 편집
+- 이미지 파일 Data URL 삽입
+- 요소 복제 / 이동 / 삭제
+- Undo / Redo
+- Desktop / Tablet / Mobile 미리보기
+- 수정 HTML 다운로드
+- 브라우저 로컬 처리
+
+실행:
+
+https://github.writeaday.click/application/htmledit/
+
+---
+
 ### Magic QR Tree
 
 입력한 URL을 QR 코드로 생성하고, QR 패턴을 3D 지형과 나무 형태로 표현하는 인터랙티브 WebGL 애플리케이션입니다.
@@ -129,6 +155,7 @@ application/
 ├── dice/
 ├── gpx-edit/
 ├── gpxnavi/
+├── htmledit/
 ├── lotto/
 ├── magic-qr-tree/
 ├── mindmap/

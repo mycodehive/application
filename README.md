@@ -16,6 +16,7 @@
 | **GPX Studio** | [gpx-edit](https://github.writeaday.click/application/gpx-edit/) | GPX 구간 자르기, 경로 삭제, 트랙 분할, 웨이포인트 편집 및 GPX 1.1 저장 |
 | **MovEdit** | [movedit](https://github.writeaday.click/application/movedit/) | 브라우저 기반 영상 편집, 자막, Overlay, Transition, Audio 분리 및 MP4 렌더링 |
 | **HTML Edit** | [htmledit](https://github.writeaday.click/application/htmledit/) | HTML 파일을 화면에서 직접 클릭하며 텍스트·속성·스타일·요소를 편집하는 비주얼 HTML 편집기 |
+| **EditPDF** | [editpdf](https://github.writeaday.click/application/editpdf/) | PDF 페이지 구성과 텍스트·이미지·서명·형광펜·도형·그리기를 브라우저에서 편집하고 새 PDF로 저장 |
 | **Magic QR Tree** | [magic-qr-tree](https://github.writeaday.click/application/magic-qr-tree/) | URL을 QR로 변환하고 3D 나무·지형으로 시각화하는 인터랙티브 WebGL 앱 |
 | **세종대 점심픽** | [sejonglaunch](https://github.writeaday.click/application/sejonglaunch/) | 거리·가격·분류 조건을 기반으로 점심 식당을 추천하는 도구 |
 | **GPX Navi** | [gpxnavi](https://github.writeaday.click/application/gpxnavi/) | GPX 경로, 현재 위치, 남은 거리, 경로 이탈 여부를 확인하는 내비게이션 |
@@ -95,6 +96,32 @@ movedit/
 
 ---
 
+### EditPDF
+
+PDF 파일을 브라우저에서 열어 페이지와 화면 요소를 직접 편집하고 새 PDF로 저장하는 로컬 PDF 편집기입니다.
+
+주요 기능:
+
+- PDF 열기 및 다른 PDF 추가
+- 페이지 Drag & Drop 순서 변경
+- 페이지 회전 / 복제 / 삭제
+- 빈 페이지 추가
+- 텍스트 추가
+- 기존 PDF 텍스트 위치 감지 및 덮어쓰기 방식 수정
+- 이미지 / 서명 삽입
+- 자유 그리기 / 형광펜 / 사각형
+- 개체 이동 / 크기 조절 / 스타일 편집
+- Undo / Redo
+- 확대 / 축소 / 폭 맞춤
+- 편집 PDF 다운로드
+- 브라우저 로컬 처리
+
+실행:
+
+https://github.writeaday.click/application/editpdf/
+
+---
+
 ### HTML Edit
 
 HTML 파일을 브라우저에서 불러와 소스코드를 직접 수정하지 않고 화면 요소를 선택하면서 수정하는 비주얼 HTML 편집기입니다.
@@ -153,6 +180,7 @@ application/
 ├── bike/
 ├── convert/
 ├── dice/
+├── editpdf/
 ├── gpx-edit/
 ├── gpxnavi/
 ├── htmledit/

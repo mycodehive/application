@@ -573,7 +573,7 @@ function trimSignatureCanvas(canvas){
   const ctx=canvas.getContext("2d"),img=ctx.getImageData(0,0,canvas.width,canvas.height),d=img.data;
   let minX=canvas.width,minY=canvas.height,maxX=-1,maxY=-1;
   for(let y=0;y<canvas.height;y++)for(let x=0;x<canvas.width;x++){
-    const i=(y*canvas.width+x)*4;const dark=d[i]<245||d[i+1]<245||d[i+2]<245;
+    const i=(y*canvas.width+x)*4;const dark=d[i+3]>10&&(d[i]<245||d[i+1]<245||d[i+2]<245);
     if(dark){minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);}
   }
   if(maxX<0)return null;

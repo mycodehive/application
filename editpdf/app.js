@@ -546,7 +546,7 @@ els.imageInput.addEventListener("change",()=>{
 
 function setupSignatureCanvas(){
   const c=els.signatureCanvas,ctx=c.getContext("2d");let drawing=false,last=null;
-  const clear=()=>{ctx.clearRect(0,0,c.width,c.height);ctx.fillStyle="#fff";ctx.fillRect(0,0,c.width,c.height);};
+  const clear=()=>{ctx.clearRect(0,0,c.width,c.height);};
   clear();
   const pos=e=>{const r=c.getBoundingClientRect();return{x:(e.clientX-r.left)*c.width/r.width,y:(e.clientY-r.top)*c.height/r.height};};
   c.addEventListener("pointerdown",e=>{drawing=true;last=pos(e);c.setPointerCapture?.(e.pointerId);});

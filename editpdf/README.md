@@ -4,7 +4,7 @@
 
 ## 실행
 
-https://github.writeaday.click/application/editpdf/
+https://github.writeaday.click/app/editpdf/
 
 ## 주요 기능
 

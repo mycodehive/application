@@ -4,7 +4,7 @@ HTML 파일을 브라우저에서 불러와 소스코드를 직접 수정하지 
 
 ## 실행
 
-https://github.writeaday.click/application/htmledit/
+https://github.writeaday.click/app/htmledit/
 
 ## 주요 기능
 

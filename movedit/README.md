@@ -91,7 +91,7 @@ npm run preview
 
 dist/의 내용을 정적 웹 서버에 배포할 수 있습니다.
 
-이 프로젝트는 base: "./"를 사용하므로 /application/movedit/ 같은 하위 경로에도 배포할 수 있도록 구성했습니다.
+이 프로젝트는 base: "./"를 사용하므로 /app/movedit/ 같은 하위 경로에도 배포할 수 있도록 구성했습니다.
 
 ### FFmpeg Core 배포
 
@@ -102,7 +102,7 @@ dist/의 내용을 정적 웹 서버에 배포할 수 있습니다.
 예:
 
 ~~~text
-/application/movedit/ffmpeg/
+/app/movedit/ffmpeg/
 ├── ffmpeg-core.js
 ├── ffmpeg-core.wasm
 └── ffmpeg-core.worker.js   # multi-thread 사용 시
@@ -111,13 +111,13 @@ dist/의 내용을 정적 웹 서버에 배포할 수 있습니다.
 빌드 시 환경변수를 지정합니다.
 
 ~~~bash
-VITE_FFMPEG_CORE_BASE=/application/movedit/ffmpeg npm run build
+VITE_FFMPEG_CORE_BASE=/app/movedit/ffmpeg npm run build
 ~~~
 
 Windows PowerShell:
 
 ~~~powershell
-$env:VITE_FFMPEG_CORE_BASE="/application/movedit/ffmpeg"
+$env:VITE_FFMPEG_CORE_BASE="/app/movedit/ffmpeg"
 npm run build
 ~~~
 
@@ -135,10 +135,10 @@ Cross-Origin-Embedder-Policy: require-corp
 Nginx 예:
 
 ~~~nginx
-location /application/movedit/ {
+location /app/movedit/ {
     add_header Cross-Origin-Opener-Policy "same-origin" always;
     add_header Cross-Origin-Embedder-Policy "require-corp" always;
-    try_files $uri $uri/ /application/movedit/index.html;
+    try_files $uri $uri/ /app/movedit/index.html;
 }
 ~~~
 
@@ -296,7 +296,7 @@ movedit/
 따라서 GitHub Pages에서는 별도의 npm 실행 없이 아래 주소에서 바로 실행됩니다.
 
 ~~~text
-https://github.writeaday.click/application/movedit/
+https://github.writeaday.click/app/movedit/
 ~~~
 
 소스를 수정할 때는 배포용 `movedit/index.html`을 직접 수정하지 말고 `movedit/source/` 아래 파일을 수정합니다.

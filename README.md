@@ -1,11 +1,12 @@
-# Application
-
+# App
 브라우저에서 바로 사용할 수 있는 개인용 웹 애플리케이션과 실험 프로젝트를 모아둔 저장소입니다.
 
 각 프로젝트는 가능한 한 설치 없이 사용할 수 있도록 구성하며, GitHub Pages를 통해 배포합니다.
 
+소스 저장소는 `mycodehive/application`을 유지하고, 공개 웹 경로는 `https://github.writeaday.click/app/`을 사용합니다.
+
 > **Application Launcher**  
-> https://github.writeaday.click/application/
+> https://github.writeaday.click/app/
 
 ---
 
@@ -13,20 +14,17 @@
 
 | 프로젝트 | 경로 | 설명 |
 | --- | --- | --- |
-| **GPX Studio** | [gpx-edit](https://github.writeaday.click/application/gpx-edit/) | GPX 구간 자르기, 경로 삭제, 트랙 분할, 웨이포인트 편집 및 GPX 1.1 저장 |
-| **MovEdit** | [movedit](https://github.writeaday.click/application/movedit/) | 브라우저 기반 영상 편집, 자막, Overlay, Transition, Audio 분리 및 MP4 렌더링 |
-| **HTML Edit** | [htmledit](https://github.writeaday.click/application/htmledit/) | HTML 파일을 화면에서 직접 클릭하며 텍스트·속성·스타일·요소를 편집하는 비주얼 HTML 편집기 |
-| **EditPDF** | [editpdf](https://github.writeaday.click/application/editpdf/) | PDF 페이지 구성과 텍스트·이미지·서명·형광펜·도형·그리기를 브라우저에서 편집하고 새 PDF로 저장 |
-| **Magic QR Tree** | [magic-qr-tree](https://github.writeaday.click/application/magic-qr-tree/) | URL을 QR로 변환하고 3D 나무·지형으로 시각화하는 인터랙티브 WebGL 앱 |
-| **세종대 점심픽** | [sejonglaunch](https://github.writeaday.click/application/sejonglaunch/) | 거리·가격·분류 조건을 기반으로 점심 식당을 추천하는 도구 |
-| **GPX Navi** | [gpxnavi](https://github.writeaday.click/application/gpxnavi/) | GPX 경로, 현재 위치, 남은 거리, 경로 이탈 여부를 확인하는 내비게이션 |
-| **자전거 트래커** | [bike](https://github.writeaday.click/application/bike/) | 주행 시간, 현재 속도, 최고 속도, 고도와 위치를 확인하는 라이딩 도구 |
-| **자전거 휴대승차 안내** | [bicycle_transport](https://github.writeaday.click/application/bicycle_transport/) | 철도·도시철도별 자전거 휴대승차 가능 여부를 정리한 정보 페이지 |
-| **Lotto 6/45 Probability Lab** | [lotto](https://github.writeaday.click/application/lotto/lotto.html) | 로또 번호 조합과 확률 개념을 실험하는 웹 도구 |
-| **Mind Map** | [mindmap](https://github.writeaday.click/application/mindmap/) | 노드 추가·삭제, 저장·불러오기, 가져오기·내보내기를 지원하는 마인드맵 |
-| **WebP → PNG Converter** | [convert](https://github.writeaday.click/application/convert/img2img.html) | 여러 WebP 이미지를 브라우저에서 PNG로 변환 |
-| **Dice Roller** | [dice / ver2](https://github.writeaday.click/application/dice/ver2/) | 1~6 사이의 주사위 값을 무작위로 생성하는 간단한 웹앱 |
-| **150km 라이딩 전략** | [myactivity](https://github.writeaday.click/application/myactivity/150km.html) | 장거리 라이딩을 구간별로 나누어 페이스와 운영 전략을 확인하는 페이지 |
+| **GPX Studio** | [gpx-edit](https://github.writeaday.click/app/gpx-edit/) | GPX 구간 자르기, 경로 삭제, 트랙 분할, 웨이포인트 편집 및 GPX 1.1 저장 |
+| **MovEdit** | [movedit](https://github.writeaday.click/app/movedit/) | 브라우저 기반 영상 편집, 자막, Overlay, Transition, Audio 분리 및 MP4 렌더링 |
+| **HTML Edit** | [htmledit](https://github.writeaday.click/app/htmledit/) | HTML 파일을 화면에서 직접 클릭하며 텍스트·속성·스타일·요소를 편집하는 비주얼 HTML 편집기 |
+| **EditPDF** | [editpdf](https://github.writeaday.click/app/editpdf/) | PDF 페이지 구성과 텍스트·이미지·서명·형광펜·도형·그리기를 브라우저에서 편집하고 새 PDF로 저장 |
+| **Magic QR Tree** | [magic-qr-tree](https://github.writeaday.click/app/magic-qr-tree/) | URL을 QR로 변환하고 3D 나무·지형으로 시각화하는 인터랙티브 WebGL 앱 |
+| **자전거 휴대승차 안내** | [bicycle_transport](https://github.writeaday.click/app/bicycle_transport/) | 철도·도시철도별 자전거 휴대승차 가능 여부를 정리한 정보 페이지 |
+| **Lotto 6/45 Probability Lab** | [lotto](https://github.writeaday.click/app/lotto/lotto.html) | 로또 번호 조합과 확률 개념을 실험하는 웹 도구 |
+| **Mind Map** | [mindmap](https://github.writeaday.click/app/mindmap/) | 노드 추가·삭제, 저장·불러오기, 가져오기·내보내기를 지원하는 마인드맵 |
+| **WebP → PNG Converter** | [convert](https://github.writeaday.click/app/convert/img2img.html) | 여러 WebP 이미지를 브라우저에서 PNG로 변환 |
+| **Dice Roller** | [dice / ver2](https://github.writeaday.click/app/dice/ver2/) | 1~6 사이의 주사위 값을 무작위로 생성하는 간단한 웹앱 |
+| **150km 라이딩 전략** | [myactivity](https://github.writeaday.click/app/myactivity/150km.html) | 장거리 라이딩을 구간별로 나누어 페이스와 운영 전략을 확인하는 페이지 |
 
 ---
 
@@ -50,7 +48,7 @@ GPX 파일을 서버에 업로드하지 않고 브라우저 안에서 직접 편
 
 실행:
 
-https://github.writeaday.click/application/gpx-edit/
+https://github.writeaday.click/app/gpx-edit/
 
 ---
 
@@ -78,7 +76,7 @@ https://github.writeaday.click/application/gpx-edit/
 
 실행:
 
-https://github.writeaday.click/application/movedit/
+https://github.writeaday.click/app/movedit/
 
 MovEdit은 개발 소스와 배포 파일을 분리해서 관리합니다.
 
@@ -118,7 +116,7 @@ PDF 파일을 브라우저에서 열어 페이지와 화면 요소를 직접 편
 
 실행:
 
-https://github.writeaday.click/application/editpdf/
+https://github.writeaday.click/app/editpdf/
 
 ---
 
@@ -143,7 +141,7 @@ HTML 파일을 브라우저에서 불러와 소스코드를 직접 수정하지 
 
 실행:
 
-https://github.writeaday.click/application/htmledit/
+https://github.writeaday.click/app/htmledit/
 
 ---
 
@@ -165,31 +163,28 @@ https://github.writeaday.click/application/htmledit/
 
 실행:
 
-https://github.writeaday.click/application/magic-qr-tree/
+https://github.writeaday.click/app/magic-qr-tree/
 
 ---
 
 ## 저장소 구조
 
 ```text
-application/
+app/
 ├── .github/
 │   └── workflows/
 ├── adguard/
 ├── bicycle_transport/
-├── bike/
 ├── convert/
 ├── dice/
 ├── editpdf/
 ├── gpx-edit/
-├── gpxnavi/
 ├── htmledit/
 ├── lotto/
 ├── magic-qr-tree/
 ├── mindmap/
 ├── movedit/
 ├── myactivity/
-├── sejonglaunch/
 ├── toss/
 ├── index.html
 └── README.md
@@ -216,7 +211,7 @@ Toss Invest 관련 Python/MCP 실험 코드를 보관하는 디렉터리입니�
 이 저장소의 기본 웹 진입점은 다음과 같습니다.
 
 ```text
-https://github.writeaday.click/application/
+https://github.writeaday.click/app/
 ```
 
 각 앱은 저장소 하위 디렉터리와 URL 경로를 동일하게 유지하는 것을 기본 원칙으로 합니다.
@@ -224,10 +219,9 @@ https://github.writeaday.click/application/
 예:
 
 ```text
-gpx-edit/  → /application/gpx-edit/
-movedit/   → /application/movedit/
-bike/      → /application/bike/
-mindmap/   → /application/mindmap/
+gpx-edit/  → /app/gpx-edit/
+movedit/   → /app/movedit/
+mindmap/   → /app/mindmap/
 ```
 
 대부분의 단일 HTML/JavaScript 앱은 GitHub Pages에서 그대로 서비스됩니다.
@@ -241,7 +235,7 @@ mindmap/   → /application/mindmap/
 새로운 웹 앱을 추가할 때는 다음 구조를 권장합니다.
 
 ```text
-application/
+app/
 └── new-app/
     ├── index.html
     ├── css/
@@ -279,4 +273,4 @@ https://github.com/mycodehive/application
 
 Launcher:
 
-https://github.writeaday.click/application/
+https://github.writeaday.click/app/

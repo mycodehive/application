@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="description" content="레거시 Excel .xls 파일을 셀 서식을 최대한 유지하며 .xlsx로 변환하는 브라우저 도구">
+  <title>ConvXLS · XLS to XLSX</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <a class="back" href="../" aria-label="Application Launcher로 돌아가기">←</a>
+      <div class="brand">
+        <div class="mark">X</div>
+        <div>
+          <strong>ConvXLS</strong>
+          <span>XLS → XLSX FORMAT CONVERTER</span>
+        </div>
+      </div>
+      <div class="privacy"><span></span>100% 브라우저 로컬 처리</div>
+    </header>
+
+    <main class="shell">
+      <section class="hero">
+        <div class="hero-copy">
+          <div class="eyebrow">LEGACY EXCEL CONVERTER</div>
+          <h1>.xls를 .xlsx로<br><em>서식까지 그대로.</em></h1>
+          <p>Excel 97–2004 <b>.xls</b> 파일을 최신 <b>.xlsx</b> 형식으로 변환합니다. 셀 값뿐 아니라 글꼴, 색상, 테두리, 정렬, 표시 형식, 병합, 행 높이와 열 너비 같은 서식 정보를 함께 변환합니다.</p>
+        </div>
+        <div class="format-flow" aria-hidden="true">
+          <div class="file-card old"><span>XLS</span><small>97–2004</small></div>
+          <div class="arrow"><i></i><b>→</b><i></i></div>
+          <div class="file-card new"><span>XLSX</span><small>2007+</small></div>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <div id="dropZone" class="drop-zone">
+          <input id="fileInput" type="file" accept=".xls,application/vnd.ms-excel" multiple hidden>
+          <div class="upload-icon">⇧</div>
+          <h2>.xls 파일을 여기에 놓으세요</h2>
+          <p>여러 파일을 한 번에 선택할 수 있습니다.</p>
+          <button id="chooseBtn" class="primary-btn" type="button">XLS 파일 선택</button>
+          <small>파일은 외부 서버로 전송되지 않습니다.</small>
+        </div>
+
+        <div id="queueSection" class="queue-section hidden">
+          <div class="queue-head">
+            <div>
+              <h2>변환 목록</h2>
+              <p id="queueSummary">0개 파일</p>
+            </div>
+            <div class="queue-actions">
+              <button id="clearBtn" class="sub-btn" type="button">전체 비우기</button>
+              <button id="convertAllBtn" class="primary-btn" type="button">모두 XLSX로 변환</button>
+            </div>
+          </div>
+
+          <div id="fileList" class="file-list"></div>
+
+          <div id="downloadBar" class="download-bar hidden">
+            <div>
+              <strong id="doneTitle">변환 완료</strong>
+              <span id="doneDetail">다운로드할 수 있습니다.</span>
+            </div>
+            <button id="downloadAllBtn" class="download-btn" type="button">전체 다운로드</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="preserve-panel">
+        <div class="preserve-title">
+          <span>✓</span>
+          <div>
+            <h2>유지 대상</h2>
+            <p>워크북에서 읽을 수 있는 셀 및 시트 서식 메타데이터를 XLSX에 다시 기록합니다.</p>
+          </div>
+        </div>
+        <div class="preserve-grid">
+          <div><b>Aa</b><span>글꼴</span><small>종류·크기·굵기·색</small></div>
+          <div><b>▦</b><span>채우기</span><small>배경색·패턴</small></div>
+          <div><b>□</b><span>테두리</span><small>선·색상</small></div>
+          <div><b>≡</b><span>정렬</span><small>가로·세로·줄바꿈</small></div>
+          <div><b>123</b><span>표시 형식</span><small>날짜·통화·백분율</small></div>
+          <div><b>↔</b><span>셀 병합</span><small>병합 영역</small></div>
+          <div><b>↕</b><span>행·열 크기</span><small>높이·너비·숨김</small></div>
+          <div><b>ƒx</b><span>수식</span><small>수식 문자열</small></div>
+        </div>
+        <div class="limit-note">
+          <strong>호환성 안내</strong>
+          <p>일반적인 셀 서식 보존을 우선합니다. VBA 매크로, ActiveX/OLE 개체, 차트·도형·이미지, 일부 조건부 서식·피벗 기능처럼 레거시 Excel의 비셀 개체는 순수 브라우저 변환에서 완전 보존되지 않을 수 있습니다. 중요한 업무 파일은 변환 후 Excel에서 한 번 확인하세요.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>ConvXLS · MyCodeHive</span>
+      <span>Local browser conversion · No upload</span>
+    </footer>
+
+    <div id="toastRoot" class="toast-root"></div>
+  </div>
+  <script src="./app.js"></script>
+</body>
+</html>

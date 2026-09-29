@@ -334,7 +334,7 @@
       function currentData(){ return jm.get_data("node_tree"); }
 
       function dataWithNotes(){
-        const payload=dataWithNotes();
+        const payload=currentData();
         payload.meta=payload.meta||{};
         payload.meta.nodeNotes={...nodeNotes};
         return payload;
@@ -440,10 +440,16 @@
         markDirty("형제 노드 추가");
       }
 
+      function deleteNotesForTree(node){
+        if(!node) return;
+        delete nodeNotes[node.id];
+        (node.children||[]).forEach(deleteNotesForTree);
+      }
+
       function deleteNode(){
         const node=jm.get_selected_node();
         if(!node||node.id==="root"){toast("루트 노드는 삭제할 수 없습니다.","error");return;}
-        delete nodeNotes[node.id];
+        deleteNotesForTree(node);
         jm.remove_node(node.id);
         jm.select_node("root");
         markDirty("노드 삭제");
@@ -498,7 +504,7 @@
       }
 
       function exportJson(){
-        const payload=currentData();
+        const payload=dataWithNotes();
         payload.meta=payload.meta||{};
         payload.meta.name=els.title.value.trim()||"mindmap";
         const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});

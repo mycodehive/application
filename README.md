@@ -3,7 +3,7 @@
 
 각 프로젝트는 가능한 한 설치 없이 사용할 수 있도록 구성하며, GitHub Pages를 통해 배포합니다.
 
-소스 저장소는 `mycodehive/application`을 유지하고, 공개 웹 경로는 `https://github.writeaday.click/app/`을 사용합니다.
+소스 저장소는 `mycodehive/app`을 유지하고, 공개 웹 경로는 `https://github.writeaday.click/app/`을 사용합니다.
 
 > **Application Launcher**  
 > https://github.writeaday.click/app/
@@ -23,6 +23,7 @@
 | **Lotto 6/45 Probability Lab** | [lotto](https://github.writeaday.click/app/lotto/lotto.html) | 로또 번호 조합과 확률 개념을 실험하는 웹 도구 |
 | **Mind Map** | [mindmap](https://github.writeaday.click/app/mindmap/) | 노드 추가·삭제, 저장·불러오기, 가져오기·내보내기를 지원하는 마인드맵 |
 | **WebP → PNG Converter** | [convert](https://github.writeaday.click/app/convert/img2img.html) | 여러 WebP 이미지를 브라우저에서 PNG로 변환 |
+| **ConvXLS** | [convxls](https://github.writeaday.click/app/convxls/) | Excel .xls 파일을 셀 서식을 최대한 유지하면서 .xlsx로 변환 |
 | **Dice Roller** | [dice / ver2](https://github.writeaday.click/app/dice/ver2/) | 1~6 사이의 주사위 값을 무작위로 생성하는 간단한 웹앱 |
 | **150km 라이딩 전략** | [myactivity](https://github.writeaday.click/app/myactivity/150km.html) | 장거리 라이딩을 구간별로 나누어 페이스와 운영 전략을 확인하는 페이지 |
 
@@ -145,6 +146,27 @@ https://github.writeaday.click/app/htmledit/
 
 ---
 
+### ConvXLS
+
+Excel 97–2004 `.xls` 파일을 최신 `.xlsx` 형식으로 변환하는 브라우저 기반 도구입니다.
+
+주요 기능:
+
+- 여러 `.xls` 파일 일괄 변환
+- 글꼴 / 채우기 / 테두리 / 정렬 등 셀 서식 유지
+- 숫자 / 날짜 / 통화 / 백분율 표시 형식 유지
+- 병합셀 유지
+- 행 높이 / 열 너비 / 숨김 속성 유지
+- 수식 및 하이퍼링크 유지 시도
+- 변환 결과 개별 XLSX 또는 ZIP 다운로드
+- 브라우저 로컬 처리
+
+실행:
+
+https://github.writeaday.click/app/convxls/
+
+---
+
 ### Magic QR Tree
 
 입력한 URL을 QR 코드로 생성하고, QR 패턴을 3D 지형과 나무 형태로 표현하는 인터랙티브 WebGL 애플리케이션입니다.
@@ -176,6 +198,7 @@ app/
 ├── adguard/
 ├── bicycle_transport/
 ├── convert/
+├── convxls/
 ├── dice/
 ├── editpdf/
 ├── gpx-edit/
@@ -269,7 +292,7 @@ app/
 
 GitHub:
 
-https://github.com/mycodehive/application
+https://github.com/mycodehive/app
 
 Launcher:
 
